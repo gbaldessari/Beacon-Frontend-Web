@@ -28,8 +28,8 @@
 }
 
 .navbar-ppal .nav-container {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .brand {
@@ -48,33 +48,46 @@
   object-fit: contain;
 }
 
-.top-links {
-  display: flex;
+.nav-theme-toggle {
+  display: inline-flex;
   align-items: center;
-  gap: 24px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--app-radius-sm);
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  color: var(--app-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.top-links a {
-  font-size: 13px;
-  color: var(--app-text-muted);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s;
-  white-space: nowrap;
-}
-
-.top-links a:hover {
+.nav-theme-toggle:hover {
+  background: var(--app-surface);
+  border-color: var(--app-border-strong);
   color: var(--app-primary);
+}
+
+.nav-theme-toggle:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 2px;
 }
 
 /* ── Responsivo ── */
 @media (max-width: 768px) {
-  .top-links {
-    display: none;
+  .nav-container {
+    padding: 0 16px;
   }
 
   .nav-logo {
     height: 40px;
-    max-width: min(200px, 70vw);
+    max-width: min(180px, 62vw);
+  }
+
+  .nav-theme-toggle {
+    width: 38px;
+    height: 38px;
   }
 }

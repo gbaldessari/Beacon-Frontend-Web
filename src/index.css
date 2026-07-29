@@ -28,6 +28,20 @@
   --app-border: #e2e8f0;
   --app-border-strong: #cbd5e1;
 
+  /* Hero */
+  --app-hero-bg: #183a72;
+  --app-hero-text: #ffffff;
+  --app-hero-muted: rgba(255, 255, 255, 0.82);
+  --app-hero-glow: rgba(255, 200, 87, 0.14);
+
+  /* Feedback surfaces */
+  --app-danger-bg: #fef2f2;
+  --app-danger-text: #7f1d1d;
+  --app-danger-border: #fecaca;
+  --app-success-bg: #f0fdf4;
+  --app-success-text: #14532d;
+  --app-success-border: #bbf7d0;
+
   /* Text */
   --app-text: #1e293b;
   --app-text-muted: #64748b;
@@ -67,7 +81,6 @@
   color-scheme: light;
   color: var(--app-text);
   background: var(--app-bg-mid);
-  background-attachment: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -101,6 +114,18 @@
   --app-surface-strong: rgba(248, 250, 252, 0.08);
   --app-border: #334155;
   --app-border-strong: #475569;
+
+  --app-hero-bg: #111827;
+  --app-hero-text: #f8fafc;
+  --app-hero-muted: rgba(248, 250, 252, 0.78);
+  --app-hero-glow: rgba(255, 200, 87, 0.12);
+
+  --app-danger-bg: #450a0a;
+  --app-danger-text: #fecaca;
+  --app-danger-border: #7f1d1d;
+  --app-success-bg: #052e16;
+  --app-success-text: #bbf7d0;
+  --app-success-border: #166534;
 
   --app-text: #f8fafc;
   --app-text-muted: #94a3b8;

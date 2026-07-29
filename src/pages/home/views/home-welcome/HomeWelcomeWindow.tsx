@@ -21,29 +21,32 @@ function HomeWelcomeWindow() {
   };
 
   const roleDescription = isAdmin
-    ? "Administra usuarios, actualiza perfiles y supervisa la operación desde un solo lugar."
-    : "Consulta tu información de cuenta y mantén tus datos personales actualizados.";
+    ? "Gestiona usuarios y perfiles para que Beacon siga claro y bajo control."
+    : "Revisa tu cuenta y mantén tus datos al día para navegar con confianza.";
 
   const canAccessProfile = hasRouteAccess(permissionType, loading, HomeRouteConfig.PROFILE.allowedPermissionTypes);
 
   return (
     <div className="home-welcome-container">
       <div className="welcome-content">
-        <h1 className="welcome-title">Bienvenido</h1>
+        <h2 className="welcome-title">¿Qué quieres hacer ahora?</h2>
+        <p className="welcome-subtitle">
+          Empieza por lo esencial. Más herramientas de finanzas y hábitos llegarán pronto.
+        </p>
 
         <div className="applications-grid">
-
           {canAccessProfile && (
-            <div
+            <button
+              type="button"
               className="application-card profile-application"
               onClick={handleNavigateToProfile}
             >
-              <div className="application-icon">
+              <div className="application-icon" aria-hidden="true">
                 {isAdmin ? <MdSettings size={36} /> : <MdPerson size={36} />}
               </div>
-              <h3>{isAdmin ? "Panel de administración" : "Mi cuenta"}</h3>
+              <h3>{isAdmin ? "Administración" : "Mi cuenta"}</h3>
               <p>{roleDescription}</p>
-            </div>
+            </button>
           )}
         </div>
 

@@ -1,9 +1,11 @@
 import type { MouseEvent } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { getDefaultAuthenticatedPath } from "../utils/roleNavigation";
 import type { PermissionType } from "../../services/auth/types/PermissionType.type";
 import { hasAccessToken } from "../../services/auth/session";
+import { useTheme } from "../theme/useTheme";
 import "./Navbar.css";
 
 const ROUTE_HISTORY_KEY = "app:route-history";
@@ -57,6 +59,7 @@ const isPublicRoute = (path: string) => PUBLIC_ROUTES.has(normalizePath(path));
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDark, toggleTheme } = useTheme();
 
   const currentPath = normalizePath(location.pathname);
   const isAuthenticated = hasAccessToken();
@@ -124,13 +127,23 @@ export const Navbar = () => {
             onClick={handleLogoClick}
           >
             <img
-              src="/assets/logo-beacon.png"
+              src={isDark ? "/assets/logo-beacon-dark.png" : "/assets/logo-beacon.png"}
               alt="Beacon"
               className="nav-logo"
               width={100}
               height={100}
             />
           </a>
+
+          <button
+            type="button"
+            className="nav-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
+            title={isDark ? "Modo claro" : "Modo oscuro"}
+          >
+            {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
+          </button>
         </div>
       </header>
     </div>

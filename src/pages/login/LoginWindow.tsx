@@ -9,6 +9,7 @@
  */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 import "./loginWindow.css";
 import { login, publicRegister } from "../../services/auth/auth.service";
 import { z } from "zod";
@@ -19,6 +20,7 @@ import { getDefaultAuthenticatedPath } from "../../commons/utils/roleNavigation"
 import type { PermissionType } from "../../services/auth/types/PermissionType.type";
 import { persistAuthProfile, setAccessToken } from "../../services/auth/session";
 import { syncCurrentRole } from "../../services/auth/authRole";
+import { useTheme } from "../../commons/theme/useTheme";
 
 // Esquemas de validación para email y contraseña usando Zod
 const emailSchema = z.email("Por favor, ingrese un correo electrónico válido.");
@@ -54,6 +56,7 @@ function LoginWindow() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isDark, toggleTheme } = useTheme();
 
   /**
    * Maneja el envío del formulario de login.
@@ -171,12 +174,22 @@ function LoginWindow() {
       <AppAlert type="error" message={error} show={showError} />
       <AppAlert type="success" message={success} show={showSuccess} />
 
+      <button
+        type="button"
+        className="login-theme-toggle"
+        onClick={toggleTheme}
+        aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
+        title={isDark ? "Modo claro" : "Modo oscuro"}
+      >
+        {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
+      </button>
+
       <main className="login-auth-main">
         <div className="login-auth-stage">
           <header className="login-auth-brand">
             <img
               className="login-auth-brand-mark"
-              src="/assets/logo-beacon.png"
+              src={isDark ? "/assets/logo-beacon-dark.png" : "/assets/logo-beacon.png"}
               alt=""
               width={220}
               height={94}

@@ -116,8 +116,8 @@ function ResetPasswordWindow() {
       <main className="reset-auth-main">
         <section className="reset-auth-hero">
           <div className="reset-auth-container">
-            <h1>Restablecer contraseña</h1>
-            <p>Use su código de recuperación para crear una nueva clave segura.</p>
+            <h1>Nueva contraseña</h1>
+            <p>Usa tu código de recuperación y define una clave segura para seguir adelante.</p>
           </div>
         </section>
 

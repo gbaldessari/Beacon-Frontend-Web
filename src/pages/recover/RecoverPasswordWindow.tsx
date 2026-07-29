@@ -85,7 +85,7 @@ function RecoverPasswordWindow() {
         <section className="recover-auth-hero">
           <div className="recover-auth-container">
             <h1>Recuperar acceso</h1>
-            <p>Reciba un código de seguridad para restablecer su contraseña.</p>
+            <p>Te enviamos un código seguro para volver a tu faro sin perder el rumbo.</p>
           </div>
         </section>
 

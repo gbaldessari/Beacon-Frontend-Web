@@ -12,6 +12,34 @@
   overflow-x: hidden;
 }
 
+.login-theme-toggle {
+  position: absolute;
+  top: max(12px, var(--app-safe-top));
+  right: max(12px, var(--app-safe-right));
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--app-radius-sm);
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+.login-theme-toggle:hover {
+  background: var(--app-surface);
+  color: var(--app-primary);
+}
+
+.login-theme-toggle:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 2px;
+}
+
 .login-auth-page::before {
   content: "";
   position: absolute;
@@ -326,7 +354,7 @@
 
 @media (max-width: 520px) {
   .login-auth-main {
-    padding: 8px 14px 28px;
+    padding: 56px 14px 28px;
     align-items: flex-start;
   }
 
