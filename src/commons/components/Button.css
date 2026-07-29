@@ -1,0 +1,115 @@
+.app-ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  position: relative;
+  min-height: 2.35rem;
+  border-radius: var(--app-radius-sm);
+  border: 1px solid transparent;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  transition: box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+}
+
+.app-ui-button:hover:not(:disabled) {
+  box-shadow: none;
+}
+
+.app-ui-button:disabled:not(.is-loading) {
+  opacity: 0.62;
+}
+
+.app-ui-button.is-loading {
+  opacity: 1;
+}
+
+.app-ui-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.app-ui-button.is-loading .app-ui-button__content {
+  visibility: hidden;
+}
+
+.app-ui-button__loading {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.app-ui-button--primary {
+  background: var(--app-primary);
+  color: var(--app-accent-text);
+  border-color: var(--app-primary);
+  box-shadow: none;
+}
+
+.app-ui-button--primary:hover:not(:disabled) {
+  background: var(--app-primary-hover);
+  border-color: var(--app-primary-hover);
+  box-shadow: none;
+}
+
+.app-ui-button--secondary {
+  background: var(--app-panel);
+  color: var(--app-primary);
+  border-color: var(--app-border-strong);
+  box-shadow: none;
+}
+
+.app-ui-button--secondary:hover:not(:disabled) {
+  border-color: var(--app-secondary);
+  background: var(--app-surface);
+}
+
+.app-ui-button--danger {
+  background: var(--app-danger);
+  color: #ffffff;
+  border-color: var(--app-danger);
+  box-shadow: none;
+}
+
+.app-ui-button--danger:hover:not(:disabled) {
+  background: var(--app-danger-strong);
+  border-color: var(--app-danger-strong);
+  box-shadow: none;
+}
+
+.app-ui-button--ghost {
+  background: transparent;
+  color: var(--app-primary);
+  border-color: var(--app-border-strong);
+}
+
+.app-ui-button--ghost:hover:not(:disabled) {
+  background: var(--app-surface);
+}
+
+.app-ui-button--text {
+  background: transparent;
+  color: var(--app-primary);
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  padding: 0.12rem 0.1rem;
+  min-height: auto;
+}
+
+.app-ui-button--text:hover:not(:disabled) {
+  color: var(--app-primary-hover);
+  box-shadow: none;
+}

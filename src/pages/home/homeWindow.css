@@ -1,0 +1,97 @@
+.home-auth-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  background: var(--app-bg-mid);
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.home-auth-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-auth-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.home-auth-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--app-primary);
+  color: #ffffff;
+  padding: 48px 0 36px;
+}
+
+.home-auth-hero::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -80px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(255, 200, 87, 0.12);
+  pointer-events: none;
+}
+
+.home-auth-hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.home-auth-hero h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.home-auth-hero p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  color: #ffffff;
+}
+
+.home-logout-button.app-ui-button.app-ui-button--danger {
+  border-radius: var(--app-radius-sm);
+  padding: 9px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.home-auth-section {
+  padding: 40px 0 56px;
+}
+
+.home-auth-card {
+  width: 100%;
+  background: var(--app-panel);
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow-sm);
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .home-auth-hero-content {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .home-auth-card {
+    padding: 16px;
+  }
+}

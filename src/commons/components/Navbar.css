@@ -1,0 +1,80 @@
+/* ── Wrapper sticky ── */
+.navbar-wrapper {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: none;
+}
+
+/* ── Contenedor interno ── */
+.nav-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ══════════════════════════════
+   BARRA SUPERIOR
+══════════════════════════════ */
+.navbar-ppal {
+  background: var(--app-panel);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.navbar-ppal .nav-container {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  display: block;
+  height: 50px;
+  width: auto;
+  max-width: min(240px, 58vw);
+  aspect-ratio: 1046 / 445;
+  object-fit: contain;
+}
+
+.top-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.top-links a {
+  font-size: 13px;
+  color: var(--app-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.top-links a:hover {
+  color: var(--app-primary);
+}
+
+/* ── Responsivo ── */
+@media (max-width: 768px) {
+  .top-links {
+    display: none;
+  }
+
+  .nav-logo {
+    height: 40px;
+    max-width: min(200px, 70vw);
+  }
+}

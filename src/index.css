@@ -1,0 +1,261 @@
+:root {
+  /* Brand */
+  --app-primary: #183a72;
+  --app-primary-hover: #102b57;
+  --app-primary-light: #4a90e2;
+  --app-secondary: #6d8db3;
+  --app-accent: #4a90e2;
+  --app-accent-strong: #183a72;
+  --app-accent-text: #ffffff;
+  --app-beam: #ffc857;
+  --app-beam-hover: #efb43d;
+
+  /* Semantic */
+  --app-success: #22c55e;
+  --app-danger: #ef4444;
+  --app-danger-strong: #dc2626;
+  --app-warning: #f59e0b;
+  --app-info: #3b82f6;
+
+  /* Surfaces */
+  --app-bg-deep: #f8fafc;
+  --app-bg-mid: #f8fafc;
+  --app-bg-soft: #f8fafc;
+  --app-panel: #ffffff;
+  --app-panel-soft: #ffffff;
+  --app-surface: rgba(24, 58, 114, 0.04);
+  --app-surface-strong: rgba(24, 58, 114, 0.08);
+  --app-border: #e2e8f0;
+  --app-border-strong: #cbd5e1;
+
+  /* Text */
+  --app-text: #1e293b;
+  --app-text-muted: #64748b;
+  --app-text-soft: #94a3b8;
+  --app-heading: #0f172a;
+
+  /* Elevation & shape */
+  --app-shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --app-shadow-md: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --app-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --app-radius-lg: 16px;
+  --app-radius-md: 14px;
+  --app-radius-sm: 12px;
+
+  /* Typography scale */
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.125rem;
+  --text-body: 0.95rem;
+  --text-caption: 0.8rem;
+
+  /* Scrollbar */
+  --app-scrollbar-track: #f1f5f9;
+  --app-scrollbar-thumb: #cbd5e1;
+  --app-scrollbar-thumb-hover: #94a3b8;
+
+  /* Safe areas */
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-right: env(safe-area-inset-right, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-left: env(safe-area-inset-left, 0px);
+
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-size: var(--text-body);
+  color-scheme: light;
+  color: var(--app-text);
+  background: var(--app-bg-mid);
+  background-attachment: fixed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
+}
+
+[data-theme="dark"] {
+  --app-primary: #4a90e2;
+  --app-primary-hover: #6ba3e8;
+  --app-primary-light: #4a90e2;
+  --app-secondary: #6d8db3;
+  --app-accent: #4a90e2;
+  --app-accent-strong: #4a90e2;
+  --app-accent-text: #0b1120;
+  --app-beam: #ffc857;
+  --app-beam-hover: #efb43d;
+
+  --app-success: #22c55e;
+  --app-danger: #ef4444;
+  --app-danger-strong: #f87171;
+  --app-warning: #f59e0b;
+  --app-info: #3b82f6;
+
+  --app-bg-deep: #0b1120;
+  --app-bg-mid: #0b1120;
+  --app-bg-soft: #0b1120;
+  --app-panel: #1e293b;
+  --app-panel-soft: #111827;
+  --app-surface: rgba(248, 250, 252, 0.04);
+  --app-surface-strong: rgba(248, 250, 252, 0.08);
+  --app-border: #334155;
+  --app-border-strong: #475569;
+
+  --app-text: #f8fafc;
+  --app-text-muted: #94a3b8;
+  --app-text-soft: #64748b;
+  --app-heading: #f8fafc;
+
+  --app-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --app-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --app-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  --app-scrollbar-track: #111827;
+  --app-scrollbar-thumb: #334155;
+  --app-scrollbar-thumb-hover: #475569;
+
+  color-scheme: dark;
+  color: var(--app-text);
+  background: var(--app-bg-mid);
+}
+
+html {
+  min-height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 0.72rem;
+  height: 0.72rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--app-scrollbar-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--app-scrollbar-thumb);
+  border: 2px solid var(--app-scrollbar-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--app-scrollbar-thumb-hover);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  color: var(--app-text);
+  background: transparent;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+h1 {
+  font-size: var(--text-h1);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--app-heading);
+}
+
+p,
+span,
+small,
+label {
+  color: inherit;
+}
+
+a {
+  color: var(--app-primary);
+}
+
+a:hover {
+  color: var(--app-primary-hover);
+}
+
+button {
+  border-radius: var(--app-radius-sm);
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: auto;
+  appearance: auto;
+}
+
+input:focus {
+  outline: none;
+}
+
+::selection {
+  background: rgba(74, 144, 226, 0.22);
+  color: var(--app-heading);
+}

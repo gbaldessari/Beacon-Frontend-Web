@@ -1,0 +1,58 @@
+.app-ui-modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  padding:
+    max(1rem, var(--app-safe-top, 0px))
+    max(1rem, var(--app-safe-right, 0px))
+    max(1rem, var(--app-safe-bottom, 0px))
+    max(1rem, var(--app-safe-left, 0px));
+}
+
+.app-ui-modal {
+  width: 100%;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100svh - 2rem - var(--app-safe-bottom, 0px));
+  max-height: calc(100dvh - 2rem - var(--app-safe-bottom, 0px));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  box-shadow: var(--app-shadow-lg);
+}
+
+.app-ui-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.app-ui-modal__body {
+  padding: 1rem 1.1rem;
+  color: var(--app-text);
+}
+
+.app-ui-modal__header h2 {
+  margin: 0;
+  color: var(--app-heading);
+}
+
+.app-ui-modal__header p {
+  margin: 0.35rem 0 0;
+  color: var(--app-text-muted);
+}

@@ -1,0 +1,40 @@
+.app-ui-field {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-panel);
+  color: var(--app-text);
+  padding: 0.62rem 0.78rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+select.app-ui-field {
+  padding-right: 2.2rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--app-text-muted) 50%),
+    linear-gradient(135deg, var(--app-text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.app-ui-field::placeholder {
+  color: var(--app-text-soft);
+}
+
+.app-ui-field:focus {
+  outline: none;
+  border-color: var(--app-primary-light);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.16);
+  background: var(--app-panel);
+}
+
+.app-ui-field:disabled {
+  background: var(--app-bg-mid);
+  color: var(--app-text-muted);
+  cursor: not-allowed;
+}
