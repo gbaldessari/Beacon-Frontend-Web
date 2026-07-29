@@ -2,16 +2,22 @@
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
+  max-width: 100%;
+  min-height: 2.75rem;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-sm);
-  background: var(--app-panel);
+  background-color: var(--app-panel);
   color: var(--app-text);
   padding: 0.62rem 0.78rem;
+  /* iOS Safari zooms focused inputs under 16px */
+  font-size: 16px;
+  line-height: 1.35;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 select.app-ui-field {
   padding-right: 2.2rem;
+  background-color: var(--app-panel);
   background-image:
     linear-gradient(45deg, transparent 50%, var(--app-text-muted) 50%),
     linear-gradient(135deg, var(--app-text-muted) 50%, transparent 50%);
@@ -30,11 +36,39 @@ select.app-ui-field {
   outline: none;
   border-color: var(--app-primary-light);
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.16);
-  background: var(--app-panel);
+  background-color: var(--app-panel);
 }
 
 .app-ui-field:disabled {
-  background: var(--app-bg-mid);
+  background-color: var(--app-bg-mid);
   color: var(--app-text-muted);
   cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Date / time: keep usable native controls on iOS */
+input[type="date"].app-ui-field,
+input[type="time"].app-ui-field,
+input[type="datetime-local"].app-ui-field {
+  display: block;
+  min-height: 2.75rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="date"].app-ui-field::-webkit-date-and-time-value,
+input[type="time"].app-ui-field::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em;
+}
+
+input[type="date"].app-ui-field::-webkit-calendar-picker-indicator,
+input[type="time"].app-ui-field::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+textarea.app-ui-field {
+  resize: vertical;
+  min-height: 5.5rem;
 }

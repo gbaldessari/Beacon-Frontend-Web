@@ -4,7 +4,7 @@
   justify-content: center;
   gap: 0.45rem;
   position: relative;
-  min-height: 2.35rem;
+  min-height: 2.75rem;
   border-radius: var(--app-radius-sm);
   border: 1px solid transparent;
   padding: 0.5rem 0.9rem;

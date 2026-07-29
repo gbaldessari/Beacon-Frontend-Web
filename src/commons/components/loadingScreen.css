@@ -4,13 +4,17 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: color-mix(in srgb, var(--app-bg-mid) 86%, transparent);
+  background: rgba(248, 250, 252, 0.86);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .loading-screen {
+  background: rgba(11, 17, 32, 0.86);
 }
 
 .spinner-balls {

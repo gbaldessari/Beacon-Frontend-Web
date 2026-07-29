@@ -68,7 +68,15 @@
   --app-scrollbar-thumb: #cbd5e1;
   --app-scrollbar-thumb-hover: #94a3b8;
 
-  /* Safe areas */
+  /* Safe areas (iOS notch / home indicator) */
+  --app-safe-top: 0px;
+  --app-safe-right: 0px;
+  --app-safe-bottom: 0px;
+  --app-safe-left: 0px;
+  --app-safe-top: constant(safe-area-inset-top);
+  --app-safe-right: constant(safe-area-inset-right);
+  --app-safe-bottom: constant(safe-area-inset-bottom);
+  --app-safe-left: constant(safe-area-inset-left);
   --app-safe-top: env(safe-area-inset-top, 0px);
   --app-safe-right: env(safe-area-inset-right, 0px);
   --app-safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -145,16 +153,19 @@
   background: var(--app-bg-mid);
 }
 
-html {
-  min-height: 100%;
-  scrollbar-width: thin;
-  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
-}
-
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  min-height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 *::-webkit-scrollbar {
@@ -184,6 +195,7 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   color: var(--app-text);
   background: transparent;
 }
@@ -236,6 +248,14 @@ a:hover {
   color: var(--app-primary-hover);
 }
 
+button,
+a,
+[role="button"],
+label {
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
 button {
   border-radius: var(--app-radius-sm);
   border: 1px solid transparent;
@@ -245,6 +265,8 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 button:hover:not(:disabled) {
@@ -278,6 +300,15 @@ input[type="radio"] {
 
 input:focus {
   outline: none;
+}
+
+/* Prevent iOS Safari auto-zoom on focus (requires >= 16px) */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 ::selection {

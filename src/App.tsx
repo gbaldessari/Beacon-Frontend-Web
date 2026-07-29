@@ -14,6 +14,7 @@ import { validateRefreshToken, validateToken } from "./services/auth/auth.servic
 import HomeWindow from "./pages/home/HomeWindow";
 import HomeWelcomeWindow from "./pages/home/views/home-welcome/HomeWelcomeWindow";
 import AdminWindow from "./pages/home/views/admin/AdminWindow";
+import TasksWindow from "./pages/home/views/tasks/TasksWindow";
 import ResetPasswordWindow from "./pages/reset/ResetPasswordWindow";
 import RecoverPasswordWindow from "./pages/recover/RecoverPasswordWindow";
 import { HomeRouteConfig, ProtectedPaths } from "./commons/utils/protectedPaths";
@@ -227,6 +228,17 @@ function App() {
                   fallbackPath={HomeRouteConfig.WELCOME.fallbackPath}
                 >
                   <HomeWelcomeWindow />
+                </ProtectedRoute>
+              )}
+            />
+            <Route
+              path={HomeRouteConfig.TASKS.routePath}
+              element={(
+                <ProtectedRoute
+                  allowedPermissionTypes={HomeRouteConfig.TASKS.allowedPermissionTypes}
+                  fallbackPath={HomeRouteConfig.TASKS.fallbackPath}
+                >
+                  <TasksWindow />
                 </ProtectedRoute>
               )}
             />

@@ -5,6 +5,8 @@
   top: 0;
   z-index: 100;
   box-shadow: none;
+  padding-top: var(--app-safe-top);
+  background: var(--app-panel);
 }
 
 /* ── Contenedor interno ── */
@@ -13,6 +15,8 @@
   max-width: 1140px;
   margin: 0 auto;
   padding: 0 24px;
+  padding-left: max(24px, var(--app-safe-left));
+  padding-right: max(24px, var(--app-safe-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,8 +56,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: var(--app-radius-sm);
   border: 1px solid var(--app-border);
@@ -87,7 +91,7 @@
   }
 
   .nav-theme-toggle {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
   }
 }

@@ -19,6 +19,8 @@
   max-width: 1140px;
   margin: 0 auto;
   padding: 0 24px;
+  padding-left: max(24px, var(--app-safe-left));
+  padding-right: max(24px, var(--app-safe-right));
 }
 
 .home-auth-hero {

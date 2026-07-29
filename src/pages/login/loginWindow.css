@@ -20,8 +20,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: var(--app-radius-sm);
   border: 1px solid var(--app-border);
@@ -57,6 +57,10 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
+  padding-top: max(40px, calc(var(--app-safe-top) + 52px));
+  padding-right: max(20px, var(--app-safe-right));
+  padding-bottom: max(40px, var(--app-safe-bottom));
+  padding-left: max(20px, var(--app-safe-left));
 }
 
 .login-auth-stage {
@@ -207,7 +211,7 @@
 .login-auth-form .login-auth-input.app-ui-field {
   width: 100%;
   padding: 12px 14px;
-  font-size: 0.95rem;
+  font-size: 16px;
   border-radius: var(--app-radius-sm);
   border: 1px solid var(--app-border);
   background: var(--app-panel);
@@ -355,6 +359,10 @@
 @media (max-width: 520px) {
   .login-auth-main {
     padding: 56px 14px 28px;
+    padding-top: max(56px, calc(var(--app-safe-top) + 52px));
+    padding-right: max(14px, var(--app-safe-right));
+    padding-bottom: max(28px, var(--app-safe-bottom));
+    padding-left: max(14px, var(--app-safe-left));
     align-items: flex-start;
   }
 
