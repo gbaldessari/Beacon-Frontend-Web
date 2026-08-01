@@ -12,11 +12,11 @@
 /* ── Contenedor interno ── */
 .nav-container {
   width: 100%;
-  max-width: 1140px;
+  max-width: var(--content-max, 1140px);
   margin: 0 auto;
-  padding: 0 24px;
-  padding-left: max(24px, var(--app-safe-left));
-  padding-right: max(24px, var(--app-safe-right));
+  padding: 0 var(--page-pad, 24px);
+  padding-left: max(var(--page-pad, 24px), var(--app-safe-left));
+  padding-right: max(var(--page-pad, 24px), var(--app-safe-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -41,6 +41,7 @@
   align-items: center;
   text-decoration: none;
   flex-shrink: 0;
+  min-height: var(--tap-min, 44px);
 }
 
 .nav-logo {
@@ -48,6 +49,7 @@
   height: 50px;
   width: auto;
   max-width: min(240px, 58vw);
+  min-height: 32px;
   aspect-ratio: 1046 / 445;
   object-fit: contain;
 }
@@ -56,8 +58,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: var(--tap-min, 44px);
+  height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  min-height: var(--tap-min, 44px);
   padding: 0;
   border-radius: var(--app-radius-sm);
   border: 1px solid var(--app-border);
@@ -74,24 +78,36 @@
   color: var(--app-primary);
 }
 
+.nav-theme-toggle:active {
+  background: var(--app-surface-strong);
+}
+
 .nav-theme-toggle:focus-visible {
   outline: 2px solid var(--app-primary-light);
   outline-offset: 2px;
 }
 
-/* ── Responsivo ── */
-@media (max-width: 768px) {
+/* phone ≤640px | tablet ≤960px */
+@media (max-width: 960px) {
   .nav-container {
-    padding: 0 16px;
+    padding-left: max(var(--page-pad-sm, 16px), var(--app-safe-left));
+    padding-right: max(var(--page-pad-sm, 16px), var(--app-safe-right));
   }
 
   .nav-logo {
     height: 40px;
     max-width: min(180px, 62vw);
   }
+}
 
-  .nav-theme-toggle {
-    width: 44px;
-    height: 44px;
+@media (max-width: 640px) {
+  .navbar-ppal .nav-container {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .nav-logo {
+    height: 36px;
+    max-width: min(160px, 58vw);
   }
 }

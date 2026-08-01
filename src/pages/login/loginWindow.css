@@ -20,8 +20,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: var(--tap-min, 44px);
+  height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  min-height: var(--tap-min, 44px);
   padding: 0;
   border-radius: var(--app-radius-sm);
   border: 1px solid var(--app-border);
@@ -33,6 +35,10 @@
 .login-theme-toggle:hover {
   background: var(--app-surface);
   color: var(--app-primary);
+}
+
+.login-theme-toggle:active {
+  background: var(--app-surface-strong);
 }
 
 .login-theme-toggle:focus-visible {
@@ -147,12 +153,14 @@
   font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  min-height: var(--tap-min, 44px);
   padding: 16px 12px 14px;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
-.login-auth-tab:hover {
+.login-auth-tab:hover,
+.login-auth-tab:active {
   color: var(--app-text);
   transform: none;
 }
@@ -238,14 +246,16 @@
 .login-auth-forgot button {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 0.5rem 0.25rem;
+  min-height: var(--tap-min, 44px);
   font-size: 0.84rem;
   font-weight: 600;
   color: var(--app-primary);
   cursor: pointer;
 }
 
-.login-auth-forgot button:hover {
+.login-auth-forgot button:hover,
+.login-auth-forgot button:active {
   color: var(--app-primary-hover);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -285,7 +295,8 @@
 .login-auth-link {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 0.35rem 0.15rem;
+  min-height: var(--tap-min, 44px);
   color: var(--app-primary);
   font-size: inherit;
   font-weight: 700;
@@ -294,7 +305,8 @@
   text-underline-offset: 3px;
 }
 
-.login-auth-link:hover {
+.login-auth-link:hover,
+.login-auth-link:active {
   color: var(--app-beam-hover);
   transform: none;
 }
@@ -356,7 +368,7 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
   .login-auth-main {
     padding: 56px 14px 28px;
     padding-top: max(56px, calc(var(--app-safe-top) + 52px));
@@ -376,5 +388,9 @@
 
   .login-auth-name-row {
     grid-template-columns: 1fr;
+  }
+
+  .login-auth-tab {
+    font-size: 0.88rem;
   }
 }

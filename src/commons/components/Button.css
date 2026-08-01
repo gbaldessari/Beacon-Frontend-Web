@@ -4,7 +4,8 @@
   justify-content: center;
   gap: 0.45rem;
   position: relative;
-  min-height: 2.75rem;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
   border-radius: var(--app-radius-sm);
   border: 1px solid transparent;
   padding: 0.5rem 0.9rem;
@@ -17,6 +18,15 @@
 
 .app-ui-button:hover:not(:disabled) {
   box-shadow: none;
+}
+
+.app-ui-button:active:not(:disabled) {
+  opacity: 0.92;
+}
+
+.app-ui-button:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 2px;
 }
 
 .app-ui-button:disabled:not(.is-loading) {
@@ -105,11 +115,18 @@
   border-color: transparent;
   text-decoration: underline;
   text-underline-offset: 0.18em;
-  padding: 0.12rem 0.1rem;
-  min-height: auto;
+  padding: 0.5rem 0.6rem;
+  min-height: var(--tap-min, 44px);
+  min-width: auto;
 }
 
 .app-ui-button--text:hover:not(:disabled) {
   color: var(--app-primary-hover);
   box-shadow: none;
+}
+
+.app-ui-button--text:active:not(:disabled) {
+  color: var(--app-primary-hover);
+  opacity: 1;
+  background: var(--app-surface);
 }

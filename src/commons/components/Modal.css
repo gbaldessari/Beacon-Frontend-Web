@@ -56,3 +56,30 @@
   margin: 0.35rem 0 0;
   color: var(--app-text-muted);
 }
+
+@media (max-width: 640px) {
+  .app-ui-modal-overlay {
+    align-items: flex-end;
+    padding:
+      max(0.5rem, var(--app-safe-top, 0px))
+      0
+      0
+      0;
+  }
+
+  .app-ui-modal {
+    width: 100%;
+    max-height: calc(100vh - var(--app-safe-top, 0px) - 0.5rem);
+    max-height: calc(100svh - var(--app-safe-top, 0px) - 0.5rem);
+    max-height: calc(100dvh - var(--app-safe-top, 0px) - 0.5rem);
+    border-radius: var(--app-radius-md) var(--app-radius-md) 0 0;
+    padding-bottom: var(--app-safe-bottom, 0px);
+  }
+
+  .app-ui-modal__header,
+  .app-ui-modal__body {
+    padding-left: max(1rem, var(--app-safe-left, 0px));
+    padding-right: max(1rem, var(--app-safe-right, 0px));
+  }
+}
+

@@ -39,6 +39,11 @@ select.app-ui-field {
   background-color: var(--app-panel);
 }
 
+.app-ui-field:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 1px;
+}
+
 .app-ui-field:disabled {
   background-color: var(--app-bg-mid);
   color: var(--app-text-muted);

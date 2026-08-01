@@ -1,4 +1,5 @@
 .app-ui-checkbox {
+  /* Visual box */
   width: 1.125rem;
   height: 1.125rem;
   min-width: 1.125rem;
@@ -7,6 +8,16 @@
   cursor: pointer;
   -webkit-appearance: checkbox;
   appearance: auto;
+  /* Expand tap target without changing layout much */
+  margin: 0;
+  padding: calc((var(--tap-min, 44px) - 1.125rem) / 2);
+  box-sizing: content-box;
+  vertical-align: middle;
+}
+
+.app-ui-checkbox:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 2px;
 }
 
 .app-ui-checkbox:disabled {

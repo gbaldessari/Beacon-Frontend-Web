@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { MdAdd, MdCheckCircleOutline, MdDeleteOutline, MdRadioButtonUnchecked } from "react-icons/md";
+import {
+  MdAdd,
+  MdCheckCircleOutline,
+  MdDeleteOutline,
+  MdEdit,
+  MdRadioButtonUnchecked,
+} from "react-icons/md";
 import {
   AppAlert,
   AppButton,
@@ -12,15 +18,30 @@ import {
 import {
   createReminder,
   deleteReminder,
+  listReminderCompletions,
+  listReminderOccurrences,
   listReminders,
   setReminderCompletion,
+  updateReminder,
 } from "../../../../services/reminders/reminders.service";
 import type {
   CreateReminderPayload,
   Reminder,
+  ReminderEditScope,
+  ReminderOccurrence,
   ReminderRecurrence,
   ReminderTimeMode,
 } from "../../../../services/reminders/types/Reminder.type";
+import { RecurrenceScopeDialog } from "./RecurrenceScopeDialog";
+import { TasksCalendar } from "./TasksCalendar";
+import {
+  addDays,
+  occurrenceCompletionKey,
+  startOfMonth,
+  startOfWeekMonday,
+  toDateKey,
+  type CalendarViewMode,
+} from "./tasksCalendarUtils";
 import "./tasksWindow.css";
 
 const WEEKDAY_OPTIONS = [
@@ -56,6 +77,13 @@ const RECURRENCE_LABELS: Record<Exclude<ReminderRecurrence, "none">, string> = {
 
 type FilterTab = "all" | "pending" | "completed";
 
+const VIEW_OPTIONS: { value: CalendarViewMode; label: string }[] = [
+  { value: "list", label: "Lista" },
+  { value: "day", label: "Día" },
+  { value: "week", label: "Semana" },
+  { value: "month", label: "Mes" },
+];
+
 const todayIsoDate = () => {
   const now = new Date();
   const y = now.getFullYear();
@@ -63,6 +91,9 @@ const todayIsoDate = () => {
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
+
+const startOfLocalDay = (date = new Date()) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
 const toYearlyDateValue = (monthOfYear: number, dayOfMonth: number) => {
   const year = new Date().getFullYear();
@@ -87,6 +118,28 @@ const emptyForm = {
   notifyValue: 1,
   notifyUnit: "hours" as "hours" | "days",
 };
+
+type ReminderFormState = typeof emptyForm;
+
+const reminderToForm = (reminder: Reminder): ReminderFormState => ({
+  title: reminder.title,
+  description: reminder.description ?? "",
+  repeats: reminder.repeats && !reminder.isOverride,
+  recurrenceType:
+    reminder.repeats && reminder.recurrenceType !== "none"
+      ? (reminder.recurrenceType as Exclude<ReminderRecurrence, "none">)
+      : "weekly",
+  scheduledDate: reminder.scheduledDate ?? todayIsoDate(),
+  weekdays: reminder.weekdays?.length ? [...reminder.weekdays] : [1, 2, 3, 4, 5],
+  dayOfMonth: reminder.dayOfMonth ?? 1,
+  monthOfYear: reminder.monthOfYear ?? 1,
+  timeMode: reminder.timeMode,
+  startTime: reminder.startTime ?? "09:00",
+  endTime: reminder.endTime ?? "10:00",
+  notifyEnabled: reminder.notifyEnabled,
+  notifyValue: reminder.notifyValue ?? 1,
+  notifyUnit: reminder.notifyUnit ?? "hours",
+});
 
 function formatTimeLabel(reminder: Reminder): string {
   if (reminder.timeMode === "all_day") {
@@ -133,12 +186,47 @@ function TasksWindow() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<FilterTab>("all");
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("list");
+  const [cursorDate, setCursorDate] = useState(() => startOfLocalDay());
+  const [completedKeys, setCompletedKeys] = useState<Set<string>>(() => new Set());
+  const [occurrences, setOccurrences] = useState<ReminderOccurrence[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingOccurrenceDate, setEditingOccurrenceDate] = useState<string | null>(null);
+  const [scopeDialog, setScopeDialog] = useState<{
+    mode: "edit" | "delete";
+    allowInstanceScopes: boolean;
+  } | null>(null);
+  const [pendingPayload, setPendingPayload] = useState<CreateReminderPayload | null>(null);
+  const [form, setForm] = useState<ReminderFormState>(emptyForm);
   const [error, setError] = useState("");
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const isEditing = Boolean(editingId);
+
+  const editingReminder = useMemo(
+    () => reminders.find((item) => item.id === editingId) ?? null,
+    [editingId, reminders],
+  );
+
+  const occurrenceRange = useMemo(() => {
+    if (viewMode === "day") {
+      const key = toDateKey(cursorDate);
+      return { from: key, to: key };
+    }
+    if (viewMode === "week") {
+      const start = startOfWeekMonday(cursorDate);
+      return { from: toDateKey(start), to: toDateKey(addDays(start, 6)) };
+    }
+    if (viewMode === "month") {
+      const gridStart = startOfWeekMonday(startOfMonth(cursorDate));
+      return { from: toDateKey(gridStart), to: toDateKey(addDays(gridStart, 41)) };
+    }
+    return null;
+  }, [viewMode, cursorDate]);
+
 
   const flashError = (message: string) => {
     setError(message);
@@ -154,18 +242,68 @@ function TasksWindow() {
 
   const loadReminders = async () => {
     setLoading(true);
-    const response = await listReminders();
-    if (response.success && response.data) {
-      setReminders(response.data);
+    const [remindersResponse, completionsResponse] = await Promise.all([
+      listReminders(),
+      listReminderCompletions(),
+    ]);
+
+    if (remindersResponse.success && remindersResponse.data) {
+      setReminders(remindersResponse.data);
     } else {
-      flashError(response.error || "No se pudieron cargar los recordatorios.");
+      flashError(remindersResponse.error || "No se pudieron cargar los recordatorios.");
     }
+
+    if (completionsResponse.success && completionsResponse.data) {
+      const keys = new Set<string>();
+      for (const completion of completionsResponse.data) {
+        if (completion.occurrenceDate) {
+          keys.add(
+            occurrenceCompletionKey(completion.reminderId, completion.occurrenceDate),
+          );
+        }
+      }
+      setCompletedKeys(keys);
+    }
+
     setLoading(false);
+  };
+
+  const loadOccurrences = async (from: string, to: string) => {
+    const response = await listReminderOccurrences(from, to);
+    if (response.success && response.data) {
+      setOccurrences(response.data);
+      setCompletedKeys((current) => {
+        const next = new Set(current);
+        for (const item of response.data ?? []) {
+          const key = occurrenceCompletionKey(item.reminderId, item.date);
+          if (item.completed) {
+            next.add(key);
+          } else {
+            next.delete(key);
+          }
+        }
+        return next;
+      });
+    }
   };
 
   useEffect(() => {
     void loadReminders();
   }, []);
+
+  useEffect(() => {
+    if (!occurrenceRange) {
+      return;
+    }
+    void loadOccurrences(occurrenceRange.from, occurrenceRange.to);
+  }, [occurrenceRange?.from, occurrenceRange?.to]);
+
+  const refreshAll = async () => {
+    await loadReminders();
+    if (occurrenceRange) {
+      await loadOccurrences(occurrenceRange.from, occurrenceRange.to);
+    }
+  };
 
   const filteredReminders = useMemo(() => {
     if (filter === "pending") {
@@ -180,10 +318,29 @@ function TasksWindow() {
   const pendingCount = reminders.filter((item) => !item.completed).length;
   const completedCount = reminders.filter((item) => item.completed).length;
 
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingId(null);
+    setEditingOccurrenceDate(null);
+    setPendingPayload(null);
+  };
+
   const openCreateModal = () => {
+    setEditingId(null);
+    setEditingOccurrenceDate(null);
     setForm({ ...emptyForm, scheduledDate: todayIsoDate() });
     setModalOpen(true);
   };
+
+  const openEditModal = (reminder: Reminder, occurrenceDate?: string) => {
+    setEditingId(reminder.id);
+    setEditingOccurrenceDate(occurrenceDate ?? null);
+    setForm(reminderToForm(reminder));
+    setModalOpen(true);
+  };
+
+  const needsScopeDialog = (reminder: Reminder | null) =>
+    Boolean(reminder && reminder.repeats && !reminder.isOverride);
 
   const toggleWeekday = (day: number) => {
     setForm((current) => {
@@ -253,28 +410,89 @@ function TasksWindow() {
     return payload;
   };
 
-  const handleCreate = async () => {
+  const applySave = async (
+    payload: CreateReminderPayload,
+    scope?: ReminderEditScope,
+  ) => {
+    if (!editingId) {
+      setSaving(true);
+      const response = await createReminder(payload);
+      setSaving(false);
+      if (!response.success || !response.data) {
+        flashError(response.error || "No se pudo crear el recordatorio.");
+        return;
+      }
+      closeModal();
+      flashSuccess("Recordatorio creado.");
+      await refreshAll();
+      return;
+    }
+
+    setSaving(true);
+    const response = await updateReminder(editingId, {
+      ...payload,
+      ...(scope ? { scope } : { scope: "all" as ReminderEditScope }),
+      ...(editingOccurrenceDate ? { occurrenceDate: editingOccurrenceDate } : {}),
+    });
+    setSaving(false);
+
+    if (!response.success || !response.data) {
+      flashError(response.error || "No se pudo actualizar el recordatorio.");
+      return;
+    }
+
+    closeModal();
+    setScopeDialog(null);
+    setPendingPayload(null);
+    flashSuccess("Recordatorio actualizado.");
+    await refreshAll();
+  };
+
+  const handleSave = async () => {
     const payload = buildPayload();
     if (!payload) {
       return;
     }
 
-    setSaving(true);
-    const response = await createReminder(payload);
-    setSaving(false);
-
-    if (!response.success || !response.data) {
-      flashError(response.error || "No se pudo crear el recordatorio.");
+    if (!editingId) {
+      await applySave(payload);
       return;
     }
 
-    setReminders((current) => [response.data as Reminder, ...current]);
-    setModalOpen(false);
-    flashSuccess("Recordatorio creado.");
+    if (needsScopeDialog(editingReminder)) {
+      setPendingPayload(payload);
+      setScopeDialog({
+        mode: "edit",
+        allowInstanceScopes: Boolean(editingOccurrenceDate),
+      });
+      return;
+    }
+
+    await applySave(payload, editingReminder?.isOverride ? "this" : "all");
   };
 
-  const handleToggleCompletion = async (reminder: Reminder) => {
-    const response = await setReminderCompletion(reminder.id, !reminder.completed);
+  const isOccurrenceCompleted = (reminderId: string, occurrenceDate: string) =>
+    completedKeys.has(occurrenceCompletionKey(reminderId, occurrenceDate));
+
+  const handleToggleCompletion = async (
+    reminder: Reminder,
+    occurrenceDate?: string,
+  ) => {
+    const dateKey =
+      occurrenceDate ||
+      (!reminder.repeats && reminder.scheduledDate
+        ? reminder.scheduledDate
+        : todayIsoDate());
+    const key = occurrenceCompletionKey(reminder.id, dateKey);
+    const currentlyCompleted = occurrenceDate
+      ? completedKeys.has(key)
+      : reminder.completed;
+
+    const response = await setReminderCompletion(
+      reminder.id,
+      !currentlyCompleted,
+      dateKey,
+    );
     if (!response.success || !response.data) {
       flashError(response.error || "No se pudo actualizar el estado.");
       return;
@@ -283,22 +501,84 @@ function TasksWindow() {
     setReminders((current) =>
       current.map((item) => (item.id === reminder.id ? (response.data as Reminder) : item)),
     );
+
+    setCompletedKeys((current) => {
+      const next = new Set(current);
+      if (currentlyCompleted) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+
+    setOccurrences((current) =>
+      current.map((item) =>
+        item.reminderId === reminder.id && item.date === dateKey
+          ? { ...item, completed: !currentlyCompleted }
+          : item,
+      ),
+    );
   };
 
-  const handleDelete = async (reminder: Reminder) => {
-    const confirmed = window.confirm(`¿Eliminar "${reminder.title}"?`);
-    if (!confirmed) {
+  const applyDelete = async (scope: ReminderEditScope) => {
+    if (!editingId) {
       return;
     }
 
-    const response = await deleteReminder(reminder.id);
+    setSaving(true);
+    const response = await deleteReminder(editingId, {
+      scope,
+      occurrenceDate: editingOccurrenceDate ?? undefined,
+    });
+    setSaving(false);
+
     if (!response.success) {
       flashError(response.error || "No se pudo eliminar el recordatorio.");
       return;
     }
 
-    setReminders((current) => current.filter((item) => item.id !== reminder.id));
+    closeModal();
+    setScopeDialog(null);
     flashSuccess("Recordatorio eliminado.");
+    await refreshAll();
+  };
+
+  const handleDelete = async () => {
+    if (!editingId) {
+      return;
+    }
+
+    if (needsScopeDialog(editingReminder)) {
+      setScopeDialog({
+        mode: "delete",
+        allowInstanceScopes: Boolean(editingOccurrenceDate),
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `¿Eliminar "${editingReminder?.title ?? "este recordatorio"}"? Esta acción no se puede deshacer.`,
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    await applyDelete(editingReminder?.isOverride ? "this" : "all");
+  };
+
+  const handleScopeSelect = async (scope: ReminderEditScope) => {
+    if (!scopeDialog) {
+      return;
+    }
+    if (scopeDialog.mode === "edit") {
+      if (!pendingPayload) {
+        return;
+      }
+      await applySave(pendingPayload, scope);
+      return;
+    }
+    await applyDelete(scope);
   };
 
   return (
@@ -319,38 +599,68 @@ function TasksWindow() {
         </AppButton>
       </div>
 
-      <div className="tasks-window-tabs" role="tablist" aria-label="Filtro de tareas">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={filter === "all"}
-          className={`tasks-window-tab ${filter === "all" ? "is-active" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          Todas ({reminders.length})
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={filter === "pending"}
-          className={`tasks-window-tab ${filter === "pending" ? "is-active" : ""}`}
-          onClick={() => setFilter("pending")}
-        >
-          Pendientes ({pendingCount})
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={filter === "completed"}
-          className={`tasks-window-tab ${filter === "completed" ? "is-active" : ""}`}
-          onClick={() => setFilter("completed")}
-        >
-          Hechas ({completedCount})
-        </button>
+      <div className="tasks-window-view-tabs" role="tablist" aria-label="Vista de tareas">
+        {VIEW_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === option.value}
+            className={`tasks-window-view-tab ${viewMode === option.value ? "is-active" : ""}`}
+            onClick={() => setViewMode(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
       </div>
+
+      {viewMode === "list" && (
+        <div className="tasks-window-tabs" role="tablist" aria-label="Filtro de tareas">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === "all"}
+            className={`tasks-window-tab ${filter === "all" ? "is-active" : ""}`}
+            onClick={() => setFilter("all")}
+          >
+            Todas ({reminders.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === "pending"}
+            className={`tasks-window-tab ${filter === "pending" ? "is-active" : ""}`}
+            onClick={() => setFilter("pending")}
+          >
+            Pendientes ({pendingCount})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filter === "completed"}
+            className={`tasks-window-tab ${filter === "completed" ? "is-active" : ""}`}
+            onClick={() => setFilter("completed")}
+          >
+            Hechas ({completedCount})
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="tasks-window-empty">Cargando recordatorios…</p>
+      ) : viewMode !== "list" ? (
+        <TasksCalendar
+          mode={viewMode}
+          cursorDate={cursorDate}
+          occurrences={occurrences}
+          isOccurrenceCompleted={isOccurrenceCompleted}
+          onCursorChange={setCursorDate}
+          onSelectDay={(date) => setCursorDate(startOfLocalDay(date))}
+          onToggleCompletion={(reminder, dateKey) =>
+            void handleToggleCompletion(reminder, dateKey)
+          }
+          onEditReminder={(reminder, dateKey) => openEditModal(reminder, dateKey)}
+        />
       ) : filteredReminders.length === 0 ? (
         <div className="tasks-window-empty-state">
           <p className="tasks-window-empty">
@@ -402,11 +712,11 @@ function TasksWindow() {
 
               <button
                 type="button"
-                className="tasks-window-delete"
-                aria-label={`Eliminar ${reminder.title}`}
-                onClick={() => void handleDelete(reminder)}
+                className="tasks-window-edit"
+                aria-label={`Editar ${reminder.title}`}
+                onClick={() => openEditModal(reminder)}
               >
-                <MdDeleteOutline size={22} />
+                <MdEdit size={22} />
               </button>
             </li>
           ))}
@@ -424,9 +734,17 @@ function TasksWindow() {
 
       <AppModal
         open={modalOpen}
-        onClose={() => !saving && setModalOpen(false)}
-        title="Nueva tarea"
-        subtitle="Fecha u horario, repetición y aviso previo."
+        onClose={() => {
+          if (!saving) {
+            closeModal();
+          }
+        }}
+        title={isEditing ? "Editar tarea" : "Nueva tarea"}
+        subtitle={
+          isEditing
+            ? "Modifica el recordatorio o elimínalo si ya no lo necesitas."
+            : "Fecha u horario, repetición y aviso previo."
+        }
         className="tasks-window-modal"
       >
         <div className="tasks-window-form">
@@ -690,15 +1008,40 @@ function TasksWindow() {
           )}
 
           <div className="tasks-window-form-actions">
-            <AppButton variant="ghost" disabled={saving} onClick={() => setModalOpen(false)}>
-              Cancelar
-            </AppButton>
-            <AppButton isLoading={saving} onClick={() => void handleCreate()}>
-              Guardar
-            </AppButton>
+            {isEditing ? (
+              <AppButton
+                variant="danger"
+                disabled={saving}
+                onClick={() => void handleDelete()}
+              >
+                <MdDeleteOutline size={18} />
+                Eliminar
+              </AppButton>
+            ) : (
+              <span />
+            )}
+            <div className="tasks-window-form-actions-end">
+              <AppButton variant="ghost" disabled={saving} onClick={closeModal}>
+                Cancelar
+              </AppButton>
+              <AppButton isLoading={saving} onClick={() => void handleSave()}>
+                {isEditing ? "Guardar cambios" : "Guardar"}
+              </AppButton>
+            </div>
           </div>
         </div>
       </AppModal>
+
+      <RecurrenceScopeDialog
+        open={Boolean(scopeDialog)}
+        mode={scopeDialog?.mode ?? "edit"}
+        allowInstanceScopes={scopeDialog?.allowInstanceScopes ?? false}
+        onClose={() => {
+          setScopeDialog(null);
+          setPendingPayload(null);
+        }}
+        onSelect={(scope) => void handleScopeSelect(scope)}
+      />
     </div>
   );
 }

@@ -63,6 +63,22 @@
   --text-body: 0.95rem;
   --text-caption: 0.8rem;
 
+  /*
+   * Layout tokens
+   * Breakpoints (use in @media): phone ≤640px | tablet ≤960px | desktop >960px
+   */
+  --tap-min: 44px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --content-max: 1140px;
+  --page-pad: 1.5rem;
+  --page-pad-sm: 1rem;
+
   /* Scrollbar */
   --app-scrollbar-track: #f1f5f9;
   --app-scrollbar-thumb: #cbd5e1;
@@ -273,6 +289,13 @@ button:hover:not(:disabled) {
   transform: none;
 }
 
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--app-primary-light);
+  outline-offset: 2px;
+}
+
 button:disabled {
   cursor: not-allowed;
 }
@@ -303,11 +326,22 @@ input:focus {
 }
 
 /* Prevent iOS Safari auto-zoom on focus (requires >= 16px) */
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
   select {
     font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

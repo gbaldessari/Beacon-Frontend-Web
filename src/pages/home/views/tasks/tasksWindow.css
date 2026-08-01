@@ -31,6 +31,36 @@
   flex-shrink: 0;
 }
 
+.tasks-window-view-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg-mid);
+}
+
+.tasks-window-view-tab {
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.35rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-window-view-tab.is-active {
+  background: var(--app-panel);
+  color: var(--app-primary);
+  box-shadow: var(--app-shadow-sm);
+}
+
 .tasks-window-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -83,6 +113,7 @@
 }
 
 .tasks-window-complete,
+.tasks-window-edit,
 .tasks-window-delete {
   display: inline-flex;
   align-items: center;
@@ -104,6 +135,15 @@
 
 .tasks-window-item.is-completed .tasks-window-complete {
   color: var(--app-success);
+}
+
+.tasks-window-edit {
+  color: var(--app-text-muted);
+}
+
+.tasks-window-edit:hover {
+  color: var(--app-primary);
+  background: var(--app-surface);
 }
 
 .tasks-window-delete {
@@ -347,16 +387,25 @@
 
 .tasks-window-form-actions {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.tasks-window-form-actions-end {
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.6rem;
-  margin-top: 0.25rem;
+  margin-left: auto;
 }
 
 .tasks-window-modal {
   width: min(560px, 100%);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .tasks-window-header {
     flex-direction: column;
   }
@@ -375,6 +424,8 @@
     align-self: flex-end;
     width: 56px;
     height: 56px;
+    min-width: 56px;
+    min-height: 56px;
     margin-top: 0.5rem;
     border: 0;
     border-radius: 16px;
@@ -387,14 +438,24 @@
     transform: translateZ(0);
   }
 
-  .tasks-window-fab:hover {
+  .tasks-window-fab:hover,
+  .tasks-window-fab:active {
     background: var(--app-primary-hover);
   }
 
-  .tasks-window-tabs {
+  .tasks-window {
+    padding-bottom: calc(4.5rem + var(--app-safe-bottom, 0px));
+  }
+
+  .tasks-window-tabs,
+  .tasks-window-view-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
+  }
+
+  .tasks-window-view-tabs {
+    grid-template-columns: repeat(4, minmax(4.5rem, 1fr));
   }
 
   .tasks-window-tab {
@@ -447,15 +508,751 @@
 
   .tasks-window-form-actions {
     flex-direction: column-reverse;
+    align-items: stretch;
   }
 
-  .tasks-window-form-actions > * {
+  .tasks-window-form-actions-end {
+    flex-direction: column-reverse;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tasks-window-form-actions-end > *,
+  .tasks-window-form-actions > .app-ui-button {
     width: 100%;
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 640px) {
   .tasks-window-day-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ── Calendar views ── */
+.tasks-cal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.tasks-cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tasks-cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.tasks-cal-nav-btn,
+.tasks-cal-today {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 0 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-panel);
+  color: var(--app-text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-today {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--app-primary);
+  flex-shrink: 0;
+}
+
+.tasks-cal-heading {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+  font-weight: 600;
+  color: var(--app-heading);
+  text-transform: capitalize;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.tasks-cal-allday {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-panel-soft);
+}
+
+.tasks-cal-allday-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.tasks-cal-allday-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tasks-cal-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  max-width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(74, 144, 226, 0.28);
+  border-radius: 10px;
+  background: rgba(74, 144, 226, 0.12);
+  color: var(--app-primary);
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-chip.is-compact {
+  width: 100%;
+  padding: 0.35rem 0.45rem;
+}
+
+.tasks-cal-chip.is-completed {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.tasks-cal-chip-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.tasks-cal-chip-time {
+  font-size: 0.68rem;
+  color: var(--app-text-muted);
+}
+
+.tasks-cal-day-board {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  align-items: start;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-panel);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: min(70vh, 36rem);
+}
+
+.tasks-cal-hours {
+  position: relative;
+  border-right: 1px solid var(--app-border);
+  background: var(--app-panel-soft);
+  padding-top: 0;
+}
+
+.tasks-cal-hour-slot {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.tasks-cal-hour-slot--end {
+  position: relative;
+  height: 0;
+}
+
+.tasks-cal-hour-label {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.45rem;
+  left: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-align: right;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tasks-cal-timeline {
+  position: relative;
+  min-width: 0;
+  background: var(--app-panel);
+  overflow: visible;
+}
+
+.tasks-cal-hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--app-border);
+  pointer-events: none;
+}
+
+.tasks-cal-hour-line.is-end {
+  border-top-color: transparent;
+}
+
+.tasks-cal-empty {
+  position: absolute;
+  inset: 1.5rem 1rem;
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.tasks-cal-event {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.12rem;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--app-primary);
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-event.is-point {
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.4rem 0.55rem;
+  gap: 0.08rem;
+}
+
+.tasks-cal-event.is-completed {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.tasks-cal-event-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.tasks-cal-event-time {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  opacity: 0.92;
+  flex-shrink: 0;
+}
+
+.tasks-cal-week {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-panel);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.tasks-cal-week-day {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--app-border);
+}
+
+.tasks-cal-week-day:last-child {
+  border-right: 0;
+}
+
+.tasks-cal-week-dayhead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 3.2rem;
+  padding: 0.45rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-panel-soft);
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-week-dayhead strong {
+  font-size: 1rem;
+  color: var(--app-heading);
+  font-weight: 700;
+}
+
+.tasks-cal-week-dayhead.is-today strong,
+.tasks-cal-month-cell.is-today .tasks-cal-month-daynum {
+  color: var(--app-primary);
+}
+
+.tasks-cal-week-dayhead.is-selected,
+.tasks-cal-month-cell.is-selected {
+  background: rgba(74, 144, 226, 0.1);
+}
+
+.tasks-cal-week-col {
+  min-height: 10rem;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--app-panel);
+  flex: 1;
+}
+
+.tasks-cal-week-day.is-today .tasks-cal-week-col,
+.tasks-cal-week-col.is-today {
+  background: rgba(74, 144, 226, 0.04);
+}
+
+.tasks-cal-week-empty {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--app-text-soft);
+  cursor: pointer;
+  min-height: 2.75rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-month {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-panel);
+  overflow: hidden;
+}
+
+.tasks-cal-month-weekdays,
+.tasks-cal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.tasks-cal-month-weekdays span {
+  padding: 0.55rem 0.2rem;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-panel-soft);
+}
+
+.tasks-cal-month-cell {
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  padding: 0.4rem 0.35rem;
+  border: 0;
+  border-right: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-panel);
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  color: inherit;
+}
+
+.tasks-cal-month-cell:nth-child(7n) {
+  border-right: 0;
+}
+
+.tasks-cal-month-cell.is-outside {
+  background: var(--app-bg-mid);
+  color: var(--app-text-soft);
+}
+
+.tasks-cal-month-daynum {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--app-heading);
+}
+
+.tasks-cal-month-cell.is-outside .tasks-cal-month-daynum {
+  color: var(--app-text-soft);
+}
+
+.tasks-cal-month-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.tasks-cal-month-dot {
+  display: block;
+  padding: 0.12rem 0.3rem;
+  border-radius: 6px;
+  background: rgba(74, 144, 226, 0.14);
+  color: var(--app-primary);
+  font-size: 0.65rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tasks-cal-month-dot.is-completed {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.tasks-cal-month-more {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--app-text-muted);
+}
+
+.tasks-cal-selected-panel {
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-panel-soft);
+}
+
+.tasks-cal-selected-panel h4 {
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--app-heading);
+  text-transform: capitalize;
+}
+
+.tasks-cal-selected-empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--app-text-muted);
+}
+
+.tasks-cal-selected-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tasks-cal-selected-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.55rem 0.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-panel);
+  color: inherit;
+}
+
+.tasks-cal-selected-item.is-completed {
+  opacity: 0.6;
+}
+
+.tasks-cal-selected-item.is-completed strong {
+  text-decoration: line-through;
+}
+
+.tasks-cal-selected-check,
+.tasks-cal-selected-edit {
+  color: var(--app-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--app-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-selected-edit {
+  color: var(--app-text-muted);
+  margin-left: auto;
+}
+
+.tasks-cal-selected-edit:hover {
+  color: var(--app-primary);
+  background: var(--app-surface);
+}
+
+.tasks-cal-selected-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tasks-cal-selected-body strong {
+  font-size: 0.9rem;
+  color: var(--app-heading);
+}
+
+.tasks-cal-selected-body span {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+}
+
+/* Calendar responsive — after base styles so cascade wins */
+@media (max-width: 960px) {
+  .tasks-cal-toolbar {
+    gap: 0.5rem;
+  }
+
+  .tasks-cal-heading {
+    flex: 1 1 100%;
+    order: 2;
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  .tasks-cal-nav {
+    order: 1;
+    width: 100%;
+  }
+
+  .tasks-cal-today {
+    margin-left: auto;
+  }
+
+  .tasks-cal-day-board {
+    grid-template-columns: 2.85rem minmax(0, 1fr);
+    max-height: min(62vh, 30rem);
+  }
+
+  .tasks-cal-hour-label {
+    font-size: 0.65rem;
+    right: 0.3rem;
+    left: 0.1rem;
+  }
+
+  /* Week: stacked day rows (readable on tablet + phone) */
+  .tasks-cal-week {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .tasks-cal-week-day {
+    flex-direction: row;
+    align-items: stretch;
+    border-right: 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .tasks-cal-week-day:last-child {
+    border-bottom: 0;
+  }
+
+  .tasks-cal-week-dayhead {
+    width: 4.25rem;
+    min-width: 4.25rem;
+    min-height: var(--tap-min, 44px);
+    border-bottom: 0;
+    border-right: 1px solid var(--app-border);
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.5rem 0.35rem;
+  }
+
+  .tasks-cal-week-dayhead strong {
+    font-size: 1.05rem;
+  }
+
+  .tasks-cal-week-col {
+    min-height: 3.25rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .tasks-cal-week-col .tasks-cal-chip.is-compact {
+    width: auto;
+    max-width: 100%;
+    flex: 0 1 auto;
+    min-height: 2.25rem;
+  }
+
+  .tasks-cal-week-empty {
+    flex: 1;
+    min-height: 2.25rem;
+    text-align: left;
+    padding-left: 0.15rem;
+  }
+
+  .tasks-cal-month-cell {
+    min-height: 4.25rem;
+    padding: 0.3rem 0.25rem;
+  }
+
+  .tasks-cal-month-dot {
+    font-size: 0.58rem;
+    padding: 0.1rem 0.25rem;
+  }
+
+  .tasks-cal-selected-panel {
+    margin-top: 0.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tasks-cal {
+    gap: 0.75rem;
+  }
+
+  .tasks-cal-day-board {
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+    max-height: min(58vh, 26rem);
+  }
+
+  .tasks-cal-event {
+    padding: 0.28rem 0.4rem;
+    min-width: 0;
+  }
+
+  .tasks-cal-event.is-point {
+    min-height: 40px;
+  }
+
+  .tasks-cal-event-title {
+    font-size: 0.72rem;
+  }
+
+  .tasks-cal-event-time {
+    font-size: 0.62rem;
+  }
+
+  .tasks-cal-week-dayhead {
+    width: 3.5rem;
+    min-width: 3.5rem;
+    font-size: 0.68rem;
+  }
+
+  .tasks-cal-week-dayhead strong {
+    font-size: 0.95rem;
+  }
+
+  /* Month: compact cells with dots; detail lives in selected panel */
+  .tasks-cal-month-weekdays span {
+    padding: 0.45rem 0.1rem;
+    font-size: 0.65rem;
+  }
+
+  .tasks-cal-month-cell {
+    min-height: 3.1rem;
+    gap: 0.2rem;
+    padding: 0.28rem 0.2rem 0.35rem;
+    align-items: center;
+  }
+
+  .tasks-cal-month-daynum {
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .tasks-cal-month-events {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
+    width: 100%;
+  }
+
+  .tasks-cal-month-dot {
+    font-size: 0;
+    width: 0.4rem;
+    height: 0.4rem;
+    min-width: 0.4rem;
+    padding: 0;
+    border-radius: 999px;
+    align-self: center;
+  }
+
+  .tasks-cal-month-dot:nth-child(n + 3) {
+    display: none;
+  }
+
+  .tasks-cal-month-more {
+    font-size: 0.58rem;
+    line-height: 1;
+  }
+
+  .tasks-cal-month-cell.is-today .tasks-cal-month-daynum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 999px;
+    background: var(--app-primary);
+    color: #ffffff;
+  }
+
+  .tasks-cal-selected-check,
+  .tasks-cal-selected-edit {
+    width: var(--tap-min, 44px);
+    height: var(--tap-min, 44px);
+  }
+}
+

@@ -3,7 +3,11 @@ import type { ServiceResponse } from "../ServiceResponce.type";
 import type {
   CreateReminderPayload,
   Reminder,
+  ReminderCompletion,
+  ReminderEditScope,
+  ReminderOccurrence,
   UpcomingReminder,
+  UpdateReminderPayload,
 } from "./types/Reminder.type";
 
 const parseErrorMessage = (error: unknown): string => {
@@ -52,6 +56,21 @@ export const listReminders = async (): Promise<ServiceResponse<Reminder[]>> => {
   }
 };
 
+export const listReminderOccurrences = async (
+  from: string,
+  to: string,
+): Promise<ServiceResponse<ReminderOccurrence[]>> => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await axiosInstance.get("/reminders/occurrences", {
+      params: { from, to, timezone },
+    });
+    return { success: true, data: response.data as ReminderOccurrence[] };
+  } catch (error) {
+    return { success: false, error: parseErrorMessage(error) };
+  }
+};
+
 export const listUpcomingReminders = async (): Promise<
   ServiceResponse<UpcomingReminder[]>
 > => {
@@ -77,15 +96,34 @@ export const createReminder = async (
   }
 };
 
+export const updateReminder = async (
+  id: string,
+  payload: UpdateReminderPayload,
+): Promise<ServiceResponse<Reminder>> => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await axiosInstance.patch(`/reminders/${id}`, payload, {
+      params: { timezone },
+    });
+    return { success: true, data: response.data as Reminder };
+  } catch (error) {
+    return { success: false, error: parseErrorMessage(error) };
+  }
+};
+
 export const setReminderCompletion = async (
   id: string,
   completed?: boolean,
+  occurrenceDate?: string,
 ): Promise<ServiceResponse<Reminder>> => {
   try {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await axiosInstance.patch(
       `/reminders/${id}/completion`,
-      { completed },
+      {
+        completed,
+        ...(occurrenceDate ? { occurrenceDate } : {}),
+      },
       { params: { timezone } },
     );
     return { success: true, data: response.data as Reminder };
@@ -94,9 +132,33 @@ export const setReminderCompletion = async (
   }
 };
 
-export const deleteReminder = async (id: string): Promise<ServiceResponse<void>> => {
+export const listReminderCompletions = async (
+  from?: string,
+  to?: string,
+): Promise<ServiceResponse<ReminderCompletion[]>> => {
   try {
-    await axiosInstance.delete(`/reminders/${id}`);
+    const response = await axiosInstance.get("/reminders/completions", {
+      params: { from, to },
+    });
+    return { success: true, data: response.data as ReminderCompletion[] };
+  } catch (error) {
+    return { success: false, error: parseErrorMessage(error) };
+  }
+};
+
+export const deleteReminder = async (
+  id: string,
+  options?: { scope?: ReminderEditScope; occurrenceDate?: string },
+): Promise<ServiceResponse<void>> => {
+  try {
+    await axiosInstance.delete(`/reminders/${id}`, {
+      params: {
+        ...(options?.scope ? { scope: options.scope } : {}),
+        ...(options?.occurrenceDate
+          ? { occurrenceDate: options.occurrenceDate }
+          : {}),
+      },
+    });
     return { success: true };
   } catch (error) {
     return { success: false, error: parseErrorMessage(error) };
