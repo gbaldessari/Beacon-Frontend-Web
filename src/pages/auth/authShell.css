@@ -1,0 +1,60 @@
+/* Layout de página autenticada / auth secundaria (home, recover, reset) */
+
+.auth-shell-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  background: var(--app-bg-mid);
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-shell-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-shell-container {
+  width: 100%;
+  max-width: var(--content-max, 1140px);
+  margin: 0 auto;
+  padding: 0 var(--page-pad, 24px);
+  padding-left: max(var(--page-pad, 24px), var(--app-safe-left));
+  padding-right: max(var(--page-pad, 24px), var(--app-safe-right));
+}
+
+.auth-shell-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--app-hero-bg);
+  color: var(--app-hero-text);
+}
+
+.auth-shell-hero::after {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  top: -80px;
+  right: -40px;
+  border-radius: 50%;
+  background: var(--app-hero-glow);
+  pointer-events: none;
+}
+
+.auth-shell-hero h1 {
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--app-hero-text);
+}
+
+@media (max-width: 960px) {
+  .auth-shell-container {
+    padding-left: max(var(--page-pad-sm, 16px), var(--app-safe-left));
+    padding-right: max(var(--page-pad-sm, 16px), var(--app-safe-right));
+  }
+}

@@ -8,7 +8,7 @@
  */
 
 import { useState } from "react";
-import "./resetPasswordWindow.css";
+import "../auth/authSecondaryWindow.css";
 import { useNavigate } from "react-router-dom";
 import { resetPassword } from "../../services/auth/auth.service";
 import { z } from "zod";
@@ -107,21 +107,21 @@ function ResetPasswordWindow() {
   };
 
   return (
-    <div className="reset-auth-page">
+    <div className="auth-shell-page">
       {/* Alertas de éxito y error */}
       <AppAlert type="success" message={success} show={showSuccess} />
       <AppAlert type="error" message={error} show={showError} />
       <Navbar />
 
-      <main className="reset-auth-main">
-        <section className="reset-auth-hero">
-          <div className="reset-auth-container">
+      <main className="auth-shell-main">
+        <section className="auth-shell-hero auth-secondary-hero">
+          <div className="auth-shell-container">
             <h1>Nueva contraseña</h1>
             <p>Usa tu código de recuperación y define una clave segura para seguir adelante.</p>
           </div>
         </section>
 
-        <section className="reset-auth-section">
+        <section className="auth-secondary-section">
           <ResetPasswordBlock
             recoveryCode={recoveryCode}
             newPassword={newPassword}

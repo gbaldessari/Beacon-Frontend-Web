@@ -8,7 +8,7 @@
  * @component
  */
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import "./loginWindow.css";
 import { login, publicRegister } from "../../services/auth/auth.service";
@@ -18,8 +18,9 @@ import { LoginForm } from "./subcomponents/LoginForm";
 import { RegisterForm } from "./subcomponents/RegisterForm";
 import { getDefaultAuthenticatedPath } from "../../commons/utils/roleNavigation";
 import type { PermissionType } from "../../services/auth/types/PermissionType.type";
-import { persistAuthProfile, setAccessToken } from "../../services/auth/session";
-import { syncCurrentRole } from "../../services/auth/authRole";
+import { setAccessToken } from "../../services/auth/session";
+import { setCurrentRole, syncCurrentRole } from "../../services/auth/authRole";
+import { setAuthProfile } from "../../services/auth/useAuthProfile";
 import { useTheme } from "../../commons/theme/useTheme";
 
 // Esquemas de validación para email y contraseña usando Zod
@@ -56,7 +57,16 @@ function LoginWindow() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isDark, toggleTheme } = useTheme();
+
+  const resolvePostLoginPath = (permissionType?: PermissionType | null) => {
+    const next = searchParams.get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      return next;
+    }
+    return getDefaultAuthenticatedPath(permissionType);
+  };
 
   /**
    * Maneja el envío del formulario de login.
@@ -87,8 +97,7 @@ function LoginWindow() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        setAccessToken(response.data?.accessToken || null);
-        persistAuthProfile({
+        setAuthProfile({
           firstName: response.data?.firstName,
           lastName: response.data?.lastName,
           role: response.data?.role,
@@ -96,9 +105,17 @@ function LoginWindow() {
           permissionType: response.data?.permissionType,
           email,
         });
+        if (response.data?.role && response.data?.roleName && response.data?.permissionType) {
+          setCurrentRole({
+            code: response.data.role,
+            name: response.data.roleName,
+            permissionType: response.data.permissionType,
+          });
+        }
+        setAccessToken(response.data?.accessToken || null);
         void syncCurrentRole().then((currentRole) => {
           const permissionType = currentRole?.permissionType ?? (response.data?.permissionType as PermissionType | undefined);
-          navigate(getDefaultAuthenticatedPath(permissionType));
+          navigate(resolvePostLoginPath(permissionType));
           setLoading(false);
         });
       }, 1300);
@@ -106,10 +123,7 @@ function LoginWindow() {
       const errorMessage = response.error || "Error al iniciar sesión.";
       setShowError(true);
       setError(errorMessage);
-      setTimeout(
-        () => setShowError(false),
-        errorMessage.toLowerCase().includes("pendiente de activacion") ? 5000 : 2200,
-      );
+      setTimeout(() => setShowError(false), 2200);
       setLoading(false);
     }
   };
@@ -142,7 +156,9 @@ function LoginWindow() {
     });
 
     if (response.success) {
-      setSuccess("Registro exitoso. Tu cuenta quedo pendiente de activacion y recibiras un aviso por correo.");
+      setSuccess(
+        "Solicitud recibida. Si el email es nuevo, tu cuenta quedara pendiente de activacion y recibiras un aviso por correo.",
+      );
       setShowSuccess(true);
       setRegisterFirstName("");
       setRegisterLastName("");

@@ -1,10 +1,10 @@
 /**
- * Estilos sobrios para la ventana de perfil y administracion.
+ * Perfil y administración — solo clases usadas por AdminWindow y subcomponentes.
  */
 
 .admin-window-body {
   width: 100%;
-  max-width: 1140px;
+  max-width: var(--content-max, 1140px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -20,10 +20,7 @@
 
 .admin-window-minimal-section,
 .admin-window-section,
-.admin-window-users-table-container,
-.admin-window-user-info-card,
-.admin-window-modal,
-.admin-window-delete-modal {
+.admin-window-user-info-card {
   background: var(--app-panel);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
@@ -38,11 +35,7 @@
 
 .admin-window-minimal-section h2,
 .admin-window-section-title,
-.admin-window-modal h2,
-.admin-window-modal h3,
-.admin-window-modal-header h4,
-.admin-window-user-details h4,
-.admin-window-user-permissions h5 {
+.admin-window-user-details h4 {
   margin: 0;
   color: var(--app-heading);
 }
@@ -59,25 +52,27 @@
   margin-bottom: 0.7rem;
 }
 
-.admin-window-section-description,
 .admin-window-action-description,
-.admin-window-modal p,
 .admin-window-modal-note,
 .admin-window-user-email,
 .admin-window-user-details p,
 .admin-window-loading-text,
 .admin-window-no-users,
-.admin-window-permissions-note,
-.admin-window-users-summary,
-.admin-window-inline-note {
+.admin-window-users-summary {
   color: var(--app-text-muted);
 }
 
-.admin-window-section-description,
 .admin-window-action-description {
   margin: 0.45rem 0 0.8rem;
   font-size: 0.88rem;
   line-height: 1.45;
+}
+
+.admin-window-notifications-status {
+  margin: 0 0 0.85rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--app-text-muted);
 }
 
 .admin-window-minimal-row {
@@ -95,7 +90,7 @@
 }
 
 .admin-window-minimal-input {
-  min-height: 2.75rem;
+  min-height: var(--tap-min, 44px);
   font-size: 16px;
 }
 
@@ -107,7 +102,7 @@
 .admin-window-filter-reset,
 .admin-window-pagination-button,
 .admin-window-access-toggle {
-  min-height: 2.75rem;
+  min-height: var(--tap-min, 44px);
   padding: 0.5rem 0.85rem;
   font-size: 0.875rem;
   border-radius: var(--app-radius-sm);
@@ -122,21 +117,15 @@
   min-width: 140px;
 }
 
+/* ── Perfil (usuario no admin) ── */
 .admin-window-user-info-section {
   margin-top: 0.35rem;
-}
-
-.admin-window-user-info-card {
-  padding: 1rem;
 }
 
 .admin-window-user-info-header {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  margin-bottom: 0.9rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--app-border);
 }
 
 .admin-window-user-avatar-large {
@@ -151,6 +140,7 @@
   font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .admin-window-user-details h4 {
@@ -175,60 +165,7 @@
   color: var(--app-primary);
 }
 
-.admin-window-user-permissions h5 {
-  font-size: 0.92rem;
-  margin-bottom: 0.55rem;
-}
-
-.admin-window-permissions-list {
-  display: grid;
-  gap: 0.45rem;
-  margin-bottom: 0.7rem;
-}
-
-.admin-window-permission-item {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-bg-mid);
-}
-
-.admin-window-permission-item.admin-window-granted {
-  border-color: var(--app-border-strong);
-  background: var(--app-surface);
-}
-
-.admin-window-permission-item.admin-window-denied {
-  border-color: #fecaca;
-  background: #fef2f2;
-}
-
-.admin-window-permission-icon {
-  font-size: 1.1rem;
-}
-
-.admin-window-permission-item span:nth-child(2) {
-  flex: 1;
-  color: var(--app-heading);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.admin-window-permission-status {
-  font-size: 0.77rem;
-  font-weight: 700;
-  color: var(--app-primary);
-}
-
-.admin-window-permissions-note {
-  margin: 0;
-  font-size: 0.79rem;
-  line-height: 1.4;
-}
-
+/* ── Gestión de usuarios ── */
 .admin-window-users-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -259,6 +196,7 @@
 
 .admin-window-table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-window-users-table {
@@ -307,8 +245,7 @@
   font-size: 0.82rem;
 }
 
-.admin-window-static-badge,
-.admin-window-access-toggle {
+.admin-window-static-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.34rem;
@@ -319,15 +256,13 @@
   border: 1px solid transparent;
 }
 
-.admin-window-static-badge.admin-window-granted,
-.admin-window-access-toggle.admin-window-granted {
+.admin-window-static-badge.admin-window-granted {
   color: var(--app-primary);
   background: var(--app-surface);
   border-color: var(--app-border-strong);
 }
 
-.admin-window-static-badge.admin-window-denied,
-.admin-window-access-toggle.admin-window-denied {
+.admin-window-static-badge.admin-window-denied {
   color: var(--app-text-muted);
   background: var(--app-bg-mid);
   border-color: var(--app-border);
@@ -336,15 +271,6 @@
 .admin-window-toggle-icon {
   font-size: 0.78rem;
   line-height: 1;
-}
-
-.admin-window-inline-note {
-  margin-top: 0.18rem;
-  font-size: 0.72rem;
-}
-
-.admin-window-delete-btn {
-  min-width: 102px;
 }
 
 .admin-window-actions-cell {
@@ -428,47 +354,19 @@
   gap: 0.45rem;
 }
 
-.admin-window-modal-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(15, 23, 42, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding:
-    max(1rem, var(--app-safe-top, 0px))
-    max(1rem, var(--app-safe-right, 0px))
-    max(1rem, var(--app-safe-bottom, 0px))
-    max(1rem, var(--app-safe-left, 0px));
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-}
-
-.admin-window-modal,
-.admin-window-delete-modal {
-  width: 100%;
+/* ── Modales (sobre AppModal) ── */
+.app-ui-modal.admin-window-modal {
   width: min(520px, 100%);
-  max-height: calc(100vh - 2rem);
-  max-height: calc(100svh - 2rem - var(--app-safe-bottom, 0px));
-  max-height: calc(100dvh - 2rem - var(--app-safe-bottom, 0px));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 1rem;
 }
 
-.admin-window-delete-modal {
+.app-ui-modal.admin-window-delete-modal {
   width: min(430px, 100%);
 }
 
 .admin-window-modal-form {
   display: grid;
   gap: 0.6rem;
-  margin: 0.95rem 0;
+  margin: 0 0 0.95rem;
 }
 
 .admin-window-modal-field {
@@ -486,16 +384,12 @@
   font-size: 0.73rem;
 }
 
-.admin-window-modal-header {
-  margin-bottom: 0.4rem;
-}
-
-.admin-window-modal-header h4 {
-  font-size: 0.96rem;
-}
-
 .admin-window-modal-body {
   text-align: center;
+}
+
+.admin-window-modal-body p {
+  color: var(--app-text-muted);
 }
 
 .admin-window-warning-icon {
@@ -504,23 +398,23 @@
 }
 
 .admin-window-warning-text {
-  color: var(--app-danger) !important;
+  color: var(--app-danger);
   font-weight: 700;
   font-size: 0.79rem;
 }
 
-.admin-window-modal-actions,
-.admin-window-modal-editprofile-actions,
-.admin-window-modal-confirm-actions {
+.admin-window-modal-actions {
   display: flex;
   gap: 0.55rem;
   margin-top: 0.75rem;
 }
 
-.admin-window-modal-actions > *,
-.admin-window-modal-editprofile-actions > *,
-.admin-window-modal-confirm-actions > * {
+.admin-window-modal-actions > * {
   flex: 1;
+}
+
+.admin-window-modal .admin-window-submit-button {
+  margin-top: 0;
 }
 
 @media (max-width: 960px) {
@@ -530,7 +424,6 @@
 
   .admin-window-filter-reset {
     grid-column: 1 / -1;
-    justify-self: stretch;
     width: 100%;
   }
 
@@ -598,9 +491,7 @@
   }
 
   .admin-window-actions-cell {
-    display: flex;
     flex-direction: column;
-    gap: 0.5rem;
   }
 
   .admin-window-actions-cell > * {
@@ -645,33 +536,12 @@
     gap: 0.26rem;
   }
 
-  .admin-window-modal,
-  .admin-window-delete-modal {
+  .app-ui-modal.admin-window-modal,
+  .app-ui-modal.admin-window-delete-modal {
     width: 100%;
-    padding: 0.85rem;
   }
 
-  .admin-window-modal-overlay {
-    align-items: flex-end;
-    padding:
-      max(0.5rem, var(--app-safe-top, 0px))
-      0
-      0
-      0;
-  }
-
-  .admin-window-modal,
-  .admin-window-delete-modal {
-    max-height: calc(100dvh - var(--app-safe-top, 0px) - 0.5rem);
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: var(--app-radius-md) var(--app-radius-md) 0 0;
-    padding-bottom: max(0.85rem, var(--app-safe-bottom, 0px));
-  }
-
-  .admin-window-modal-actions,
-  .admin-window-modal-editprofile-actions,
-  .admin-window-modal-confirm-actions {
+  .admin-window-modal-actions {
     flex-direction: column;
   }
 }

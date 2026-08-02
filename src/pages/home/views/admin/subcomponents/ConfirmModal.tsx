@@ -1,5 +1,5 @@
 import React from "react";
-import { AppButton, DotSpinner } from '../../../../../commons/components';
+import { AppButton, AppModal, DotSpinner } from '../../../../../commons/components';
 
 /**
  * Componente modal de confirmación para acciones críticas.
@@ -31,45 +31,51 @@ type ConfirmModalProps = {
  * @param {React.Dispatch} props.setConfirmModal - Setter para el estado del modal.
  */
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({ confirmModal, setConfirmModal }) => {
-  if (!confirmModal) return null;
   let title = "";
   let message = "";
-  if (confirmModal.type === "profile") {
+  if (confirmModal?.type === "profile") {
     title = "Confirmar actualización de perfil";
     message = "¿Deseas guardar los cambios en tu perfil?";
-  } else if (confirmModal.type === "password") {
+  } else if (confirmModal?.type === "password") {
     title = "Confirmar cambio de contraseña";
     message = "¿Deseas cambiar tu contraseña?";
-  } else if (confirmModal.type === "register") {
+  } else if (confirmModal?.type === "register") {
     title = "Confirmar registro de usuario";
     message = "¿Deseas registrar este nuevo usuario?";
   }
+
   return (
-    <div className="admin-window-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setConfirmModal(null); }}>
-      <div className="modal admin-window-modal">
-        <h2>{title}</h2>
-        <p>{message}</p>
-        <div className="admin-window-modal-actions admin-window-modal-confirm-actions">
-          <AppButton
-            variant="secondary"
-            className={confirmModal.loading ? "admin-window-submit-button admin-window-loading" : "admin-window-submit-button"}
-            onClick={() => setConfirmModal(null)}
-            disabled={confirmModal.loading}
-          >
-            Cancelar
-          </AppButton>
-          <AppButton
-            variant="primary"
-            className={confirmModal.loading ? "admin-window-submit-button admin-window-loading" : "admin-window-submit-button"}
-            onClick={confirmModal.onConfirm}
-            isLoading={confirmModal.loading}
-          >
-            {confirmModal.loading ? (
-              <DotSpinner compact />
-            ) : "Confirmar"}
-          </AppButton>
-        </div>
+    <AppModal
+      open={Boolean(confirmModal)}
+      title={title}
+      onClose={() => {
+        if (!confirmModal?.loading) {
+          setConfirmModal(null);
+        }
+      }}
+      className="admin-window-modal"
+    >
+      <p>{message}</p>
+      <div className="admin-window-modal-actions">
+        <AppButton
+          variant="secondary"
+          className="admin-window-submit-button"
+          onClick={() => setConfirmModal(null)}
+          disabled={confirmModal?.loading}
+        >
+          Cancelar
+        </AppButton>
+        <AppButton
+          variant="primary"
+          className="admin-window-submit-button"
+          onClick={confirmModal?.onConfirm}
+          isLoading={Boolean(confirmModal?.loading)}
+        >
+          {confirmModal?.loading ? (
+            <DotSpinner compact />
+          ) : "Confirmar"}
+        </AppButton>
       </div>
-    </div>
+    </AppModal>
   );
 };

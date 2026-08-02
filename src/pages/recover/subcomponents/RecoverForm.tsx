@@ -27,17 +27,17 @@ export function RecoverForm({
   handleSubmit: () => void;
 }): JSX.Element {
   return (
-    <div className="recover-window">
+    <div className="auth-secondary-card">
       {/* Título y descripción */}
-      <h1 className="recover-title">Recuperar Contraseña</h1>
-      <p className="recover-description">
+      <h1 className="auth-secondary-title">Recuperar Contraseña</h1>
+      <p className="auth-secondary-description">
         Ingrese su correo electrónico para recuperar su contraseña
       </p>
-      <div className="recover-form">
+      <div className="auth-secondary-form">
         {/* Campo de email */}
         <AppInput
           type="text"
-          className="recover-input"
+          className="auth-secondary-input"
           placeholder="Correo Electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -45,7 +45,7 @@ export function RecoverForm({
         {/* Botón de envío con spinner si loading */}
         <AppButton
           variant="primary"
-          className={`recover-button ${loading ? "loading" : ""}`}
+          className={`auth-secondary-button ${loading ? "loading" : ""}`}
           onClick={handleSubmit}
           isLoading={loading}
         >

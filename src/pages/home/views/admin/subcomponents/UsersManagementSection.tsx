@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AppButton, AppInput, AppSelect, DotSpinner } from '../../../../../commons/components';
+import { AppButton, AppInput, AppModal, AppSelect, DotSpinner, ListSkeleton } from '../../../../../commons/components';
 import { getUsers, deleteUser, updateUserRole, updateUserStatus } from "../../../../../services/auth/auth.service";
 import { getRoles } from "../../../../../services/auth/role.service";
 import type { GetUsersResponse } from "../../../../../services/auth/types/GetUsers.type";
@@ -261,17 +261,14 @@ export function UsersManagementSection({ onShowAlert, refreshToken }: UsersManag
 
         <p className="admin-window-users-summary">
           {loading
-            ? "Cargando usuarios..."
+            ? "Preparando listado…"
             : `Mostrando ${currentStart}-${currentEnd} de ${filteredUsers.length} usuario(s)`}
         </p>
       </div>
 
       <div className="admin-window-users-table-container">
         {loading ? (
-          <div className="admin-window-loading-text">
-            <div className="admin-window-loading-spinner"></div>
-            Cargando usuarios...
-          </div>
+          <ListSkeleton count={5} />
         ) : (
           <div className="admin-window-table-wrapper">
             <table className="admin-window-users-table">
@@ -400,46 +397,48 @@ export function UsersManagementSection({ onShowAlert, refreshToken }: UsersManag
         </div>
       )}
 
-      {deleteModal && (
-        <div className="admin-window-modal-overlay">
-          <div className="admin-window-delete-modal">
-            <div className="admin-window-modal-header">
-              <h4>Confirmar eliminación</h4>
-            </div>
-            <div className="admin-window-modal-body">
-              <div className="admin-window-warning-icon"><FiAlertTriangle size={22} /></div>
-              <p>¿Está seguro de que desea eliminar al usuario:</p>
-              <strong>{deleteModal.userName}</strong>
-              <p className="admin-window-warning-text">Esta acción no se puede deshacer.</p>
-            </div>
-            <div className="admin-window-modal-actions">
-              <AppButton
-                variant="secondary"
-                className="admin-window-cancel-btn"
-                onClick={() => setDeleteModal(null)}
-                disabled={deleteModal.loading}
-              >
-                Cancelar
-              </AppButton>
-              <AppButton
-                variant="danger"
-                className="admin-window-confirm-delete-btn"
-                onClick={confirmDeleteUser}
-                isLoading={deleteModal.loading}
-              >
-                {deleteModal.loading ? (
-                  <>
-                    <DotSpinner compact />
-                    Eliminando...
-                  </>
-                ) : (
-                  "Eliminar usuario"
-                )}
-              </AppButton>
-            </div>
-          </div>
+      <AppModal
+        open={Boolean(deleteModal)}
+        title="Confirmar eliminación"
+        onClose={() => {
+          if (!deleteModal?.loading) {
+            setDeleteModal(null);
+          }
+        }}
+        className="admin-window-modal admin-window-delete-modal"
+      >
+        <div className="admin-window-modal-body">
+          <div className="admin-window-warning-icon"><FiAlertTriangle size={22} /></div>
+          <p>¿Está seguro de que desea eliminar al usuario:</p>
+          <strong>{deleteModal?.userName}</strong>
+          <p className="admin-window-warning-text">Esta acción no se puede deshacer.</p>
         </div>
-      )}
+        <div className="admin-window-modal-actions">
+          <AppButton
+            variant="secondary"
+            className="admin-window-cancel-btn"
+            onClick={() => setDeleteModal(null)}
+            disabled={deleteModal?.loading}
+          >
+            Cancelar
+          </AppButton>
+          <AppButton
+            variant="danger"
+            className="admin-window-confirm-delete-btn"
+            onClick={confirmDeleteUser}
+            isLoading={Boolean(deleteModal?.loading)}
+          >
+            {deleteModal?.loading ? (
+              <>
+                <DotSpinner compact />
+                Eliminando...
+              </>
+            ) : (
+              "Eliminar usuario"
+            )}
+          </AppButton>
+        </div>
+      </AppModal>
     </div>
   );
 }

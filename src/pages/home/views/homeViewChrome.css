@@ -1,0 +1,72 @@
+/* Chrome compartido de vistas home (tabs segmentados + FAB) */
+
+.home-view-tabs {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg-mid);
+}
+
+.home-view-tab {
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-weight: 600;
+  min-height: var(--tap-min, 44px);
+  padding: 0.55rem 0.35rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.home-view-tab.is-active {
+  background: var(--app-panel);
+  color: var(--app-primary);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.home-view-fab {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .home-view-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: max(1rem, var(--app-safe-bottom));
+    align-self: flex-end;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+    margin-top: 0.5rem;
+    border: 0;
+    border-radius: 16px;
+    background: var(--app-primary);
+    color: #ffffff;
+    box-shadow: var(--app-shadow-md);
+    cursor: pointer;
+    z-index: 5;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  .home-view-fab:hover,
+  .home-view-fab:active {
+    background: var(--app-primary-hover);
+  }
+
+  .home-view-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}

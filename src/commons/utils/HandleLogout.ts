@@ -1,21 +1,12 @@
 import { logout } from "../../services/auth/auth.service";
 import { beginLogout, clearAuthSession, getAccessToken } from "../../services/auth/session";
-
-/**
- * Claves de sesión persistidas durante la autenticación.
- */
-const sessionKeys = [
-  "firstName",
-  "lastName",
-  "email",
-  "role",
-];
+import { setAuthProfile } from "../../services/auth/useAuthProfile";
 
 /**
  * Limpia credenciales y datos de usuario almacenados en el navegador.
  */
 const clearSession = () => {
-  sessionKeys.forEach((key) => localStorage.removeItem(key));
+  setAuthProfile(null);
   clearAuthSession();
 };
 

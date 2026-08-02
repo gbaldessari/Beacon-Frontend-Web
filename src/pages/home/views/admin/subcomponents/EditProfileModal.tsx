@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { AppButton, AppInput, DotSpinner } from '../../../../../commons/components';
+import { AppButton, AppInput, AppModal, DotSpinner } from '../../../../../commons/components';
 
 /**
  * Componente modal para editar el perfil del usuario.
@@ -36,57 +36,62 @@ export function EditProfileModal({
   onChangeFirstName: (v: string) => void;
   onChangeLastName: (v: string) => void;
   onSave: () => void;
-}): JSX.Element | null {
-  if (!open) return null;
+}): JSX.Element {
   return (
-    <div className="admin-window-modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal admin-window-modal">
-        <h2>Editar Perfil</h2>
-        <div className="admin-window-modal-form">
-          <div className="admin-window-modal-field">
-            <label>Nombre</label>
-            <AppInput
-              type="text"
-              value={firstName}
-              onChange={e => onChangeFirstName(e.target.value)}
-              className="admin-window-minimal-input"
-              autoComplete="off"
-              disabled={loading}
-            />
-          </div>
-          <div className="admin-window-modal-field">
-            <label>Apellido</label>
-            <AppInput
-              type="text"
-              value={lastName}
-              onChange={e => onChangeLastName(e.target.value)}
-              className="admin-window-minimal-input"
-              autoComplete="off"
-              disabled={loading}
-            />
-          </div>
-        </div>
-        <div className="admin-window-modal-actions admin-window-modal-editprofile-actions">
-          <AppButton
-            variant="secondary"
-            className={loading ? "admin-window-submit-button admin-window-loading" : "admin-window-submit-button"}
-            onClick={onClose}
+    <AppModal
+      open={open}
+      title="Editar Perfil"
+      onClose={() => {
+        if (!loading) {
+          onClose();
+        }
+      }}
+      className="admin-window-modal"
+    >
+      <div className="admin-window-modal-form">
+        <div className="admin-window-modal-field">
+          <label>Nombre</label>
+          <AppInput
+            type="text"
+            value={firstName}
+            onChange={e => onChangeFirstName(e.target.value)}
+            className="admin-window-minimal-input"
+            autoComplete="off"
             disabled={loading}
-          >
-            Cancelar
-          </AppButton>
-          <AppButton
-            variant="primary"
-            className={loading ? "admin-window-submit-button admin-window-loading" : "admin-window-submit-button"}
-            onClick={onSave}
-            isLoading={loading}
-          >
-            {loading ? (
-              <DotSpinner compact />
-            ) : "Guardar"}
-          </AppButton>
+          />
+        </div>
+        <div className="admin-window-modal-field">
+          <label>Apellido</label>
+          <AppInput
+            type="text"
+            value={lastName}
+            onChange={e => onChangeLastName(e.target.value)}
+            className="admin-window-minimal-input"
+            autoComplete="off"
+            disabled={loading}
+          />
         </div>
       </div>
-    </div>
+      <div className="admin-window-modal-actions">
+        <AppButton
+          variant="secondary"
+          className="admin-window-submit-button"
+          onClick={onClose}
+          disabled={loading}
+        >
+          Cancelar
+        </AppButton>
+        <AppButton
+          variant="primary"
+          className="admin-window-submit-button"
+          onClick={onSave}
+          isLoading={loading}
+        >
+          {loading ? (
+            <DotSpinner compact />
+          ) : "Guardar"}
+        </AppButton>
+      </div>
+    </AppModal>
   );
 }

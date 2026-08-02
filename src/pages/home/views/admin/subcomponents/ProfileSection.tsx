@@ -24,8 +24,6 @@ export function ProfileSection({
   firstName: string;
   lastName: string;
   email: string;
-  setFirstName: (v: string) => void;
-  setLastName: (v: string) => void;
   onUpdate: () => void;
   loading: boolean;
 }) {
@@ -56,7 +54,7 @@ export function ProfileSection({
       </div>
       <AppButton
         variant="primary"
-        className={`admin-window-submit-button ${loading ? "admin-window-loading" : ""}`}
+        className="admin-window-submit-button"
         onClick={onUpdate}
         disabled={loading}
       >

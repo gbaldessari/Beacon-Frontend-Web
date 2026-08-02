@@ -19,34 +19,14 @@ const roleListeners = new Set<RoleListener>();
 let cachedUserRole: UserRole | null = null;
 let roleSyncInFlight: Promise<UserRole | null> | null = null;
 
-const readPersistedRole = (): UserRole | null => {
-  const role = localStorage.getItem("role");
-  const roleName = localStorage.getItem("roleName");
-  const permissionType = localStorage.getItem("permissionType") as PermissionType | null;
+/** Claves de rol que ya no se persisten; se eliminan si quedaron de versiones anteriores. */
+const legacyRoleKeys = ["role", "roleName", "permissionType"] as const;
 
-  if (!role || !roleName || !permissionType) {
-    return null;
-  }
-
-  return {
-    code: role,
-    name: roleName,
-    permissionType,
-  };
+const clearLegacyRoleStorage = () => {
+  legacyRoleKeys.forEach((key) => localStorage.removeItem(key));
 };
 
-const persistUserRole = (userRole: UserRole | null) => {
-  if (!userRole) {
-    localStorage.removeItem("role");
-    localStorage.removeItem("roleName");
-    localStorage.removeItem("permissionType");
-    return;
-  }
-
-  localStorage.setItem("role", userRole.code);
-  localStorage.setItem("roleName", userRole.name);
-  localStorage.setItem("permissionType", userRole.permissionType);
-};
+clearLegacyRoleStorage();
 
 const notifyRoleListeners = () => {
   roleListeners.forEach((listener) => listener());
@@ -54,7 +34,6 @@ const notifyRoleListeners = () => {
 
 const setCachedUserRole = (userRole: UserRole | null) => {
   cachedUserRole = userRole;
-  persistUserRole(userRole);
   notifyRoleListeners();
 };
 
@@ -66,8 +45,23 @@ const subscribeToRoleChanges = (listener: RoleListener) => {
   };
 };
 
-cachedUserRole = readPersistedRole();
+/**
+ * Actualiza el rol en memoria (p. ej. tras login). No persiste en localStorage.
+ */
+export const setCurrentRole = (userRole: UserRole | null) => {
+  setCachedUserRole(userRole);
+};
 
+/**
+ * Lectura síncrona del permiso en caché de memoria (nunca desde localStorage).
+ */
+export const getCachedPermissionType = (): PermissionType | null => {
+  return cachedUserRole?.permissionType ?? null;
+};
+
+/**
+ * Obtiene el rol del usuario autenticado desde el servidor.
+ */
 export const syncCurrentRole = async (): Promise<UserRole | null> => {
   const accessToken = getAccessToken() || "";
 
@@ -132,7 +126,7 @@ export function useCurrentRole(): UseCurrentRoleResult {
 
     const unsubscribe = subscribeToRoleChanges(updateFromCache);
 
-    if (getAccessToken() && !cachedUserRole) {
+    if (getAccessToken()) {
       void syncRole();
     } else {
       setLoading(false);

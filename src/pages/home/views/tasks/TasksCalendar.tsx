@@ -57,8 +57,11 @@ function OccurrenceChip({
     <button
       type="button"
       className={`tasks-cal-chip ${completed ? "is-completed" : ""} ${compact ? "is-compact" : ""}`}
+      style={{
+        borderLeft: `3px solid ${reminder.calendarColor || "var(--app-primary)"}`,
+      }}
       onClick={() => onToggle(reminder, dateKey)}
-      title={`${reminder.title} · ${timeLabel}`}
+      title={`${reminder.title} · ${timeLabel}${reminder.calendarName ? ` · ${reminder.calendarName}` : ""}`}
     >
       <span className="tasks-cal-chip-title">{reminder.title}</span>
       {!compact && <span className="tasks-cal-chip-time">{timeLabel}</span>}

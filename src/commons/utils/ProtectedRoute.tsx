@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
-import { AppAlert } from "../components";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AppAlert, PageSkeleton, type PageSkeletonVariant } from "../components";
 import { useCurrentRole } from "../../services/auth/authRole";
 import type { PermissionType } from "../../services/auth/types/PermissionType.type";
 import { isLogoutInProgress } from "../../services/auth/session";
+import { ProtectedPaths } from "./protectedPaths";
 
 interface ProtectedRouteProps {
   /** Contenido que se renderiza solo si el usuario cumple los permisos. */
@@ -13,6 +14,22 @@ interface ProtectedRouteProps {
   allowedPermissionTypes?: readonly PermissionType[];
   /** Ruta destino cuando el usuario no tiene permisos. */
   fallbackPath?: string;
+}
+
+function skeletonVariantForPath(pathname: string): PageSkeletonVariant {
+  if (pathname.startsWith(ProtectedPaths.HOME_TASKS)) {
+    return "tasks";
+  }
+  if (pathname.startsWith(ProtectedPaths.HOME_FINANCE)) {
+    return "finance";
+  }
+  if (pathname.startsWith(ProtectedPaths.HOME_PROFILE)) {
+    return "admin";
+  }
+  if (pathname.startsWith(ProtectedPaths.HOME)) {
+    return "welcome";
+  }
+  return "content";
 }
 
 /**
@@ -27,6 +44,7 @@ export function ProtectedRoute({
   fallbackPath = "/home",
 }: ProtectedRouteProps) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { permissionType, loading } = useCurrentRole();
   const [showAlert, setShowAlert] = useState(false);
 
@@ -59,7 +77,7 @@ export function ProtectedRoute({
   }, [allowedPermissionTypes, fallbackPath, loading, navigate, permissionType]);
 
   if (loading) {
-    return null;
+    return <PageSkeleton variant={skeletonVariantForPath(pathname)} />;
   }
 
   const hasAccess = !!permissionType && (!allowedPermissionTypes || allowedPermissionTypes.includes(permissionType));

@@ -54,6 +54,13 @@
   object-fit: contain;
 }
 
+.nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .nav-theme-toggle {
   display: inline-flex;
   align-items: center;

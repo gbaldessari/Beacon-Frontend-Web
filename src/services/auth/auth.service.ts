@@ -3,6 +3,7 @@ import axiosInstance from "../AxiosInstance";
 import type { ServiceResponse } from "../ServiceResponce.type";
 import type { ChangePasswordPayload } from "./types/ChangePassword.type";
 import type { DeleteUserPayload } from "./types/DeleteUser.type";
+import type { GetProfileResponse } from "./types/GetProfile.type";
 import type { GetUsersResponse } from "./types/GetUsers.type";
 import type { LoginPayload, LoginResponse } from "./types/Login.type";
 import type { PublicRegisterPayload } from "./types/PublicRegister.type";
@@ -163,6 +164,18 @@ export const resetPassword = async (payload: ResetPasswordPayload): Promise<Serv
 export const getRole = async (_token: string): Promise<ServiceResponse<UserRole>> => {
   try {
     const response = await axiosInstance.get<UserRole>('/auth/get-role');
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, error: parseErrorMessage(error) };
+  }
+};
+
+/**
+ * Obtiene el perfil personal del usuario autenticado.
+ */
+export const getProfile = async (_token: string): Promise<ServiceResponse<GetProfileResponse>> => {
+  try {
+    const response = await axiosInstance.get<GetProfileResponse>('/auth/me');
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, error: parseErrorMessage(error) };

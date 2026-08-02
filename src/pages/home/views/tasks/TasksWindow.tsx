@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useCalendarRealtime } from "../../../../services/realtime/useRealtime";
 import {
   MdAdd,
   MdCheckCircleOutline,
   MdDeleteOutline,
   MdEdit,
+  MdPayments,
   MdRadioButtonUnchecked,
 } from "react-icons/md";
 import {
@@ -13,8 +15,32 @@ import {
   AppInput,
   AppModal,
   AppSelect,
+  PageSkeleton,
   AppTextarea,
 } from "../../../../commons/components";
+import {
+  acceptCalendarInvite,
+  createCalendar,
+  createCalendarInvite,
+  deleteCalendar,
+  listCalendarInvites,
+  listCalendarMembers,
+  listCalendars,
+  listPendingCalendarInvites,
+  removeCalendarMember,
+  revokeCalendarInvite,
+} from "../../../../services/calendars/calendars.service";
+import type {
+  Calendar,
+  CalendarInvite,
+  CalendarMember,
+} from "../../../../services/calendars/types/Calendar.type";
+import {
+  createFromReminder,
+  listCategories,
+  listFinanceSpaces,
+} from "../../../../services/finance/finance.service";
+import type { FinanceCategory } from "../../../../services/finance/types/Finance.type";
 import {
   createReminder,
   deleteReminder,
@@ -42,6 +68,7 @@ import {
   toDateKey,
   type CalendarViewMode,
 } from "./tasksCalendarUtils";
+import "../homeViewChrome.css";
 import "./tasksWindow.css";
 
 const WEEKDAY_OPTIONS = [
@@ -117,6 +144,7 @@ const emptyForm = {
   notifyEnabled: false,
   notifyValue: 1,
   notifyUnit: "hours" as "hours" | "days",
+  calendarId: "",
 };
 
 type ReminderFormState = typeof emptyForm;
@@ -139,6 +167,7 @@ const reminderToForm = (reminder: Reminder): ReminderFormState => ({
   notifyEnabled: reminder.notifyEnabled,
   notifyValue: reminder.notifyValue ?? 1,
   notifyUnit: reminder.notifyUnit ?? "hours",
+  calendarId: reminder.calendarId ?? "",
 });
 
 function formatTimeLabel(reminder: Reminder): string {
@@ -203,6 +232,26 @@ function TasksWindow() {
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [payModalOpen, setPayModalOpen] = useState(false);
+  const [payReminder, setPayReminder] = useState<Reminder | null>(null);
+  const [payAmount, setPayAmount] = useState("");
+  const [paySpaceId, setPaySpaceId] = useState("");
+  const [payCategoryId, setPayCategoryId] = useState("");
+  const [paySpaces, setPaySpaces] = useState<Array<{ id: string; name: string }>>([]);
+  const [payCategories, setPayCategories] = useState<FinanceCategory[]>([]);
+  const [paySaving, setPaySaving] = useState(false);
+  const [calendars, setCalendars] = useState<Calendar[]>([]);
+  const [activeCalendarIds, setActiveCalendarIds] = useState<string[]>([]);
+  const [pendingCalendarInvites, setPendingCalendarInvites] = useState<
+    CalendarInvite[]
+  >([]);
+  const [newCalendarName, setNewCalendarName] = useState("");
+  const [newCalendarColor, setNewCalendarColor] = useState("#1d4ed8");
+  const [shareCalendarId, setShareCalendarId] = useState<string | null>(null);
+  const [shareMembers, setShareMembers] = useState<CalendarMember[]>([]);
+  const [shareInvites, setShareInvites] = useState<CalendarInvite[]>([]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("editor");
 
   const isEditing = Boolean(editingId);
 
@@ -240,10 +289,32 @@ function TasksWindow() {
     setTimeout(() => setShowSuccess(false), 1800);
   };
 
+  const loadCalendars = async () => {
+    const [calendarsRes, pendingRes] = await Promise.all([
+      listCalendars(),
+      listPendingCalendarInvites(),
+    ]);
+    if (calendarsRes.success && calendarsRes.data) {
+      setCalendars(calendarsRes.data);
+      setActiveCalendarIds((prev) => {
+        if (prev.length === 0) {
+          return calendarsRes.data!.map((c) => c.id);
+        }
+        const known = new Set(calendarsRes.data!.map((c) => c.id));
+        const kept = prev.filter((id) => known.has(id));
+        return kept.length ? kept : calendarsRes.data!.map((c) => c.id);
+      });
+    }
+    if (pendingRes.success && pendingRes.data) {
+      setPendingCalendarInvites(pendingRes.data);
+    }
+  };
+
   const loadReminders = async () => {
     setLoading(true);
+    const ids = activeCalendarIds.length ? activeCalendarIds : undefined;
     const [remindersResponse, completionsResponse] = await Promise.all([
-      listReminders(),
+      listReminders(ids),
       listReminderCompletions(),
     ]);
 
@@ -269,7 +340,8 @@ function TasksWindow() {
   };
 
   const loadOccurrences = async (from: string, to: string) => {
-    const response = await listReminderOccurrences(from, to);
+    const ids = activeCalendarIds.length ? activeCalendarIds : undefined;
+    const response = await listReminderOccurrences(from, to, ids);
     if (response.success && response.data) {
       setOccurrences(response.data);
       setCompletedKeys((current) => {
@@ -288,15 +360,20 @@ function TasksWindow() {
   };
 
   useEffect(() => {
-    void loadReminders();
+    void loadCalendars();
   }, []);
+
+  useEffect(() => {
+    if (calendars.length === 0) return;
+    void loadReminders();
+  }, [activeCalendarIds.join(","), calendars.length]);
 
   useEffect(() => {
     if (!occurrenceRange) {
       return;
     }
     void loadOccurrences(occurrenceRange.from, occurrenceRange.to);
-  }, [occurrenceRange?.from, occurrenceRange?.to]);
+  }, [occurrenceRange?.from, occurrenceRange?.to, activeCalendarIds.join(",")]);
 
   const refreshAll = async () => {
     await loadReminders();
@@ -304,6 +381,16 @@ function TasksWindow() {
       await loadOccurrences(occurrenceRange.from, occurrenceRange.to);
     }
   };
+
+  useCalendarRealtime(
+    activeCalendarIds,
+    () => {
+      void refreshAll();
+    },
+    () => {
+      void loadCalendars();
+    },
+  );
 
   const filteredReminders = useMemo(() => {
     if (filter === "pending") {
@@ -325,11 +412,149 @@ function TasksWindow() {
     setPendingPayload(null);
   };
 
+  const editableCalendars = calendars.filter(
+    (c) => c.role === "owner" || c.role === "editor",
+  );
+
   const openCreateModal = () => {
     setEditingId(null);
     setEditingOccurrenceDate(null);
-    setForm({ ...emptyForm, scheduledDate: todayIsoDate() });
+    const defaultCalendarId =
+      editableCalendars.find((c) => c.type === "personal")?.id ??
+      editableCalendars[0]?.id ??
+      "";
+    setForm({
+      ...emptyForm,
+      scheduledDate: todayIsoDate(),
+      calendarId: defaultCalendarId,
+    });
     setModalOpen(true);
+  };
+
+  const openPayModal = async (reminder: Reminder) => {
+    setPayReminder(reminder);
+    setPayAmount("");
+    setPayCategoryId("");
+    setPayModalOpen(true);
+
+    const spacesRes = await listFinanceSpaces();
+    if (!spacesRes.success || !spacesRes.data?.length) {
+      flashError(spacesRes.error || "No se pudo cargar el espacio de finanzas.");
+      setPayModalOpen(false);
+      return;
+    }
+    setPaySpaces(spacesRes.data.map((s) => ({ id: s.id, name: s.name })));
+    const initialSpace = spacesRes.data[0].id;
+    setPaySpaceId(initialSpace);
+
+    const catRes = await listCategories(initialSpace);
+    if (catRes.success && catRes.data) {
+      setPayCategories(catRes.data);
+      const firstChild = catRes.data.flatMap((c) => c.children ?? [])[0];
+      const firstRoot = catRes.data[0];
+      setPayCategoryId(firstChild?.id ?? firstRoot?.id ?? "");
+    }
+  };
+
+  const handleRegisterPayment = async () => {
+    if (!payReminder || !paySpaceId) return;
+    const amount = Number(payAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      flashError("Ingresa un monto válido.");
+      return;
+    }
+    setPaySaving(true);
+    const response = await createFromReminder(paySpaceId, payReminder.id, {
+      amount,
+      categoryId: payCategoryId || undefined,
+      note: payReminder.title,
+    });
+    setPaySaving(false);
+    if (!response.success) {
+      flashError(response.error || "No se pudo registrar el pago.");
+      return;
+    }
+    setPayModalOpen(false);
+    flashSuccess("Pago registrado en finanzas.");
+  };
+
+  const toggleCalendar = (calendarId: string) => {
+    setActiveCalendarIds((prev) => {
+      if (prev.includes(calendarId)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((id) => id !== calendarId);
+      }
+      return [...prev, calendarId];
+    });
+  };
+
+  const handleCreateCalendar = async () => {
+    if (!newCalendarName.trim()) return;
+    const res = await createCalendar(newCalendarName.trim(), newCalendarColor);
+    if (!res.success || !res.data) {
+      flashError(res.error || "No se pudo crear el calendario.");
+      return;
+    }
+    setNewCalendarName("");
+    flashSuccess("Calendario creado.");
+    await loadCalendars();
+    setActiveCalendarIds((prev) => [...prev, res.data!.id]);
+  };
+
+  const openShareModal = async (calendarId: string) => {
+    setShareCalendarId(calendarId);
+    setInviteEmail("");
+    setInviteRole("editor");
+    const [membersRes, invitesRes] = await Promise.all([
+      listCalendarMembers(calendarId),
+      listCalendarInvites(calendarId),
+    ]);
+    if (membersRes.success && membersRes.data) setShareMembers(membersRes.data);
+    if (invitesRes.success && invitesRes.data) setShareInvites(invitesRes.data);
+    else setShareInvites([]);
+  };
+
+  const handleInvite = async () => {
+    if (!shareCalendarId || !inviteEmail.trim()) return;
+    const res = await createCalendarInvite(
+      shareCalendarId,
+      inviteEmail.trim(),
+      inviteRole,
+    );
+    if (!res.success) {
+      flashError(res.error || "No se pudo crear la invitación.");
+      return;
+    }
+    setInviteEmail("");
+    flashSuccess("Invitación enviada por correo. El token queda como respaldo.");
+    await openShareModal(shareCalendarId);
+  };
+
+  const handleAcceptCalendarInvite = async (token: string) => {
+    const res = await acceptCalendarInvite(token);
+    if (!res.success || !res.data) {
+      flashError(res.error || "No se pudo aceptar la invitación.");
+      return;
+    }
+    flashSuccess(`Te uniste a ${res.data.name}.`);
+    await loadCalendars();
+    setActiveCalendarIds((prev) =>
+      prev.includes(res.data!.id) ? prev : [...prev, res.data!.id],
+    );
+  };
+
+  const flattenPayCategories = (tree: FinanceCategory[]) => {
+    const options: Array<{ id: string; label: string }> = [];
+    for (const root of tree) {
+      if (root.children?.length) {
+        for (const child of root.children) {
+          options.push({ id: child.id, label: `${root.name} › ${child.name}` });
+        }
+      } else {
+        options.push({ id: root.id, label: root.name });
+      }
+    }
+    return options;
   };
 
   const openEditModal = (reminder: Reminder, occurrenceDate?: string) => {
@@ -366,6 +591,10 @@ function TasksWindow() {
       flashError("El título debe tener al menos 2 caracteres.");
       return null;
     }
+    if (!form.calendarId) {
+      flashError("Selecciona un calendario.");
+      return null;
+    }
 
     const payload: CreateReminderPayload = {
       title,
@@ -373,6 +602,7 @@ function TasksWindow() {
       repeats: form.repeats,
       timeMode: form.timeMode,
       notifyEnabled: form.notifyEnabled,
+      calendarId: form.calendarId,
     };
 
     if (!form.repeats) {
@@ -586,27 +816,107 @@ function TasksWindow() {
       <AppAlert type="error" message={error} show={showError} />
       <AppAlert type="success" message={success} show={showSuccess} />
 
-      <div className="tasks-window-header">
-        <div>
-          <h2 className="tasks-window-title">Recordatorios y tareas</h2>
-          <p className="tasks-window-subtitle">
-            Define fechas, horarios y avisos. Repite por semana, mes o año cuando lo necesites.
-          </p>
+      {pendingCalendarInvites.length > 0 && (
+        <div className="tasks-pending-invites">
+          {pendingCalendarInvites.map((invite) => (
+            <div key={invite.id} className="tasks-pending-invite">
+              <span>
+                Invitación a <strong>{invite.calendarName}</strong> como {invite.role}
+              </span>
+              <AppButton
+                variant="secondary"
+                onClick={() => void handleAcceptCalendarInvite(invite.token)}
+              >
+                Aceptar
+              </AppButton>
+            </div>
+          ))}
         </div>
+      )}
+
+      <div className="tasks-layout">
+        <aside className="tasks-calendars-panel" aria-label="Calendarios">
+          <h3>Mis calendarios</h3>
+          <ul className="tasks-calendars-list">
+            {calendars.map((calendar) => (
+              <li key={calendar.id}>
+                <label className="tasks-calendar-toggle">
+                  <input
+                    type="checkbox"
+                    checked={activeCalendarIds.includes(calendar.id)}
+                    onChange={() => toggleCalendar(calendar.id)}
+                  />
+                  <span
+                    className="tasks-calendar-swatch"
+                    style={{ background: calendar.color }}
+                  />
+                  <span className="tasks-calendar-name">{calendar.name}</span>
+                </label>
+                {calendar.role === "owner" && calendar.type === "shared" && (
+                  <button
+                    type="button"
+                    className="tasks-calendar-share"
+                    onClick={() => void openShareModal(calendar.id)}
+                  >
+                    Compartir
+                  </button>
+                )}
+                {calendar.role === "owner" && calendar.type === "shared" && (
+                  <button
+                    type="button"
+                    className="tasks-calendar-share"
+                    onClick={() =>
+                      void deleteCalendar(calendar.id).then(async (res) => {
+                        if (!res.success) {
+                          flashError(res.error || "No se pudo eliminar.");
+                          return;
+                        }
+                        flashSuccess("Calendario eliminado.");
+                        await loadCalendars();
+                      })
+                    }
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          <div className="tasks-calendar-create">
+            <AppInput
+              placeholder="Nuevo calendario"
+              value={newCalendarName}
+              onChange={(e) => setNewCalendarName(e.target.value)}
+            />
+            <input
+              type="color"
+              value={newCalendarColor}
+              onChange={(e) => setNewCalendarColor(e.target.value)}
+              aria-label="Color"
+            />
+            <AppButton variant="secondary" onClick={() => void handleCreateCalendar()}>
+              <MdAdd size={18} />
+              Crear
+            </AppButton>
+          </div>
+        </aside>
+
+        <div className="tasks-main">
+      <div className="tasks-window-header">
         <AppButton className="tasks-window-create" onClick={openCreateModal}>
           <MdAdd size={20} />
           Nueva tarea
         </AppButton>
       </div>
 
-      <div className="tasks-window-view-tabs" role="tablist" aria-label="Vista de tareas">
+      <div className="home-view-tabs tasks-window-view-tabs" role="tablist" aria-label="Vista de tareas">
         {VIEW_OPTIONS.map((option) => (
           <button
             key={option.value}
             type="button"
             role="tab"
             aria-selected={viewMode === option.value}
-            className={`tasks-window-view-tab ${viewMode === option.value ? "is-active" : ""}`}
+            className={`home-view-tab tasks-window-view-tab ${viewMode === option.value ? "is-active" : ""}`}
             onClick={() => setViewMode(option.value)}
           >
             {option.label}
@@ -615,12 +925,12 @@ function TasksWindow() {
       </div>
 
       {viewMode === "list" && (
-        <div className="tasks-window-tabs" role="tablist" aria-label="Filtro de tareas">
+        <div className="home-view-tabs tasks-window-tabs" role="tablist" aria-label="Filtro de tareas">
           <button
             type="button"
             role="tab"
             aria-selected={filter === "all"}
-            className={`tasks-window-tab ${filter === "all" ? "is-active" : ""}`}
+            className={`home-view-tab tasks-window-tab ${filter === "all" ? "is-active" : ""}`}
             onClick={() => setFilter("all")}
           >
             Todas ({reminders.length})
@@ -629,7 +939,7 @@ function TasksWindow() {
             type="button"
             role="tab"
             aria-selected={filter === "pending"}
-            className={`tasks-window-tab ${filter === "pending" ? "is-active" : ""}`}
+            className={`home-view-tab tasks-window-tab ${filter === "pending" ? "is-active" : ""}`}
             onClick={() => setFilter("pending")}
           >
             Pendientes ({pendingCount})
@@ -638,7 +948,7 @@ function TasksWindow() {
             type="button"
             role="tab"
             aria-selected={filter === "completed"}
-            className={`tasks-window-tab ${filter === "completed" ? "is-active" : ""}`}
+            className={`home-view-tab tasks-window-tab ${filter === "completed" ? "is-active" : ""}`}
             onClick={() => setFilter("completed")}
           >
             Hechas ({completedCount})
@@ -647,7 +957,7 @@ function TasksWindow() {
       )}
 
       {loading ? (
-        <p className="tasks-window-empty">Cargando recordatorios…</p>
+        <PageSkeleton variant="content" />
       ) : viewMode !== "list" ? (
         <TasksCalendar
           mode={viewMode}
@@ -683,6 +993,7 @@ function TasksWindow() {
             <li
               key={reminder.id}
               className={`tasks-window-item ${reminder.completed ? "is-completed" : ""}`}
+              style={{ borderLeftColor: reminder.calendarColor || "var(--app-primary)" }}
             >
               <button
                 type="button"
@@ -707,17 +1018,33 @@ function TasksWindow() {
                   </span>
                 </div>
                 {reminder.description && <p>{reminder.description}</p>}
-                <span className="tasks-window-schedule">{formatSchedule(reminder)}</span>
+                <span className="tasks-window-schedule">
+                  {formatSchedule(reminder)}
+                  {reminder.calendarName ? ` · ${reminder.calendarName}` : ""}
+                </span>
               </div>
 
-              <button
-                type="button"
-                className="tasks-window-edit"
-                aria-label={`Editar ${reminder.title}`}
-                onClick={() => openEditModal(reminder)}
-              >
-                <MdEdit size={22} />
-              </button>
+              {reminder.canEdit !== false && (
+                <div className="tasks-window-item-actions">
+                  <button
+                    type="button"
+                    className="tasks-window-edit"
+                    aria-label={`Registrar pago de ${reminder.title}`}
+                    title="Registrar pago"
+                    onClick={() => void openPayModal(reminder)}
+                  >
+                    <MdPayments size={22} />
+                  </button>
+                  <button
+                    type="button"
+                    className="tasks-window-edit"
+                    aria-label={`Editar ${reminder.title}`}
+                    onClick={() => openEditModal(reminder)}
+                  >
+                    <MdEdit size={22} />
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -725,12 +1052,14 @@ function TasksWindow() {
 
       <button
         type="button"
-        className="tasks-window-fab"
+        className="home-view-fab tasks-window-fab"
         aria-label="Nueva tarea"
         onClick={openCreateModal}
       >
         <MdAdd size={28} />
       </button>
+        </div>
+      </div>
 
       <AppModal
         open={modalOpen}
@@ -748,6 +1077,26 @@ function TasksWindow() {
         className="tasks-window-modal"
       >
         <div className="tasks-window-form">
+          <label className="tasks-window-field">
+            <span>Calendario</span>
+            <AppSelect
+              value={form.calendarId}
+              disabled={Boolean(editingId)}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  calendarId: event.target.value,
+                }))
+              }
+            >
+              {editableCalendars.map((calendar) => (
+                <option key={calendar.id} value={calendar.id}>
+                  {calendar.name}
+                </option>
+              ))}
+            </AppSelect>
+          </label>
+
           <label className="tasks-window-field">
             <span>Título</span>
             <AppInput
@@ -1029,6 +1378,172 @@ function TasksWindow() {
               </AppButton>
             </div>
           </div>
+        </div>
+      </AppModal>
+
+      <AppModal
+        open={payModalOpen}
+        onClose={() => {
+          if (!paySaving) {
+            setPayModalOpen(false);
+          }
+        }}
+        title="Registrar pago"
+        subtitle={payReminder ? `Desde: ${payReminder.title}` : undefined}
+      >
+        <div className="tasks-window-form">
+          <AppSelect
+            value={paySpaceId}
+            onChange={(e) => {
+              const nextId = e.target.value;
+              setPaySpaceId(nextId);
+              void listCategories(nextId).then((catRes) => {
+                if (catRes.success && catRes.data) {
+                  setPayCategories(catRes.data);
+                  const firstChild = catRes.data.flatMap((c) => c.children ?? [])[0];
+                  const firstRoot = catRes.data[0];
+                  setPayCategoryId(firstChild?.id ?? firstRoot?.id ?? "");
+                }
+              });
+            }}
+          >
+            {paySpaces.map((space) => (
+              <option key={space.id} value={space.id}>
+                {space.name}
+              </option>
+            ))}
+          </AppSelect>
+          <AppInput
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="Monto"
+            value={payAmount}
+            onChange={(e) => setPayAmount(e.target.value)}
+          />
+          <AppSelect
+            value={payCategoryId}
+            onChange={(e) => setPayCategoryId(e.target.value)}
+          >
+            {flattenPayCategories(payCategories).map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
+              </option>
+            ))}
+          </AppSelect>
+          <div className="tasks-window-form-actions-end">
+            <AppButton
+              variant="ghost"
+              disabled={paySaving}
+              onClick={() => setPayModalOpen(false)}
+            >
+              Cancelar
+            </AppButton>
+            <AppButton
+              isLoading={paySaving}
+              onClick={() => void handleRegisterPayment()}
+            >
+              Registrar en finanzas
+            </AppButton>
+          </div>
+        </div>
+      </AppModal>
+
+      <AppModal
+        open={Boolean(shareCalendarId)}
+        onClose={() => setShareCalendarId(null)}
+        title="Compartir calendario"
+        subtitle={
+          calendars.find((c) => c.id === shareCalendarId)?.name ?? undefined
+        }
+      >
+        <div className="tasks-window-form">
+          <div className="tasks-calendar-create">
+            <AppInput
+              type="email"
+              placeholder="Email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+            <AppSelect
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value)}
+            >
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+            </AppSelect>
+            <AppButton onClick={() => void handleInvite()}>Invitar</AppButton>
+          </div>
+
+          <h4>Miembros</h4>
+          <ul className="tasks-share-list">
+            {shareMembers.map((member) => (
+              <li key={member.id}>
+                <span>
+                  {member.firstName} {member.lastName} · {member.email} ·{" "}
+                  {member.role}
+                </span>
+                {member.role !== "owner" && shareCalendarId && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void removeCalendarMember(
+                        shareCalendarId,
+                        member.userId,
+                      ).then(async (res) => {
+                        if (!res.success) {
+                          flashError(res.error || "No se pudo eliminar.");
+                          return;
+                        }
+                        await openShareModal(shareCalendarId);
+                      })
+                    }
+                  >
+                    Quitar
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {shareInvites.length > 0 && (
+            <>
+              <h4>Invitaciones</h4>
+              <ul className="tasks-share-list">
+                {shareInvites.map((invite) => (
+                  <li key={invite.id}>
+                    <div>
+                      <span>
+                        {invite.email} · {invite.role} · {invite.status}
+                      </span>
+                      {invite.status === "pending" && (
+                        <code className="tasks-invite-token">{invite.token}</code>
+                      )}
+                    </div>
+                    {invite.status === "pending" && shareCalendarId && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void revokeCalendarInvite(
+                            shareCalendarId,
+                            invite.id,
+                          ).then(async (res) => {
+                            if (!res.success) {
+                              flashError(res.error || "No se pudo revocar.");
+                              return;
+                            }
+                            await openShareModal(shareCalendarId);
+                          })
+                        }
+                      >
+                        Revocar
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </AppModal>
 

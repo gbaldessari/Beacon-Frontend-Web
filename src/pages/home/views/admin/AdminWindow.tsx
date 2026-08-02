@@ -13,16 +13,18 @@ import "./adminWindow.css";
 import { z } from "zod";
 import { ProfileSection } from "./subcomponents/ProfileSection";
 import { ChangePasswordSection } from "./subcomponents/ChangePasswordSection";
+import { NotificationsSection } from "./subcomponents/NotificationsSection";
 import { RegisterAdminSection } from "./subcomponents/RegisterAdminSection";
 import { UsersManagementSection } from "./subcomponents/UsersManagementSection";
 import { ConfirmModal } from "./subcomponents/ConfirmModal";
 import { EditProfileModal } from "./subcomponents/EditProfileModal";
 import { changePassword, register, updateName } from "../../../../services/auth/auth.service";
-import { AppAlert } from "../../../../commons/components";
+import { AppAlert, PageSkeleton } from "../../../../commons/components";
 import { Role } from "../../../../services/auth/types/Role.type";
 import { useCurrentRole } from "../../../../services/auth/authRole";
 import type { RegisterPayload } from "../../../../services/auth/types/Register.type";
-import { getAccessToken, persistAuthProfile } from "../../../../services/auth/session";
+import { getAccessToken } from "../../../../services/auth/session";
+import { setAuthProfile, useAuthProfile } from "../../../../services/auth/useAuthProfile";
 
 const passwordSchema = z
   .string()
@@ -40,9 +42,12 @@ const emailSchema = z.string().email("Por favor, ingrese un correo electrónico 
  * Gestiona el estado de los formularios, modales, validaciones y alertas.
  */
 function AdminWindow() {
-  const [firstName, setFirstName] = useState(localStorage.getItem("firstName") || "");
-  const [lastName, setLastName] = useState(localStorage.getItem("lastName") || "");
-  const [email] = useState(localStorage.getItem("email") || "");
+  const {
+    firstName,
+    lastName,
+    email,
+    loading: profileLoading,
+  } = useAuthProfile();
   const { roleName, isAdmin, loading: roleLoading } = useCurrentRole();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -119,9 +124,7 @@ function AdminWindow() {
     if (response.success) {
       setSuccessMessage("Perfil actualizado con éxito.");
       setShowSuccess(true);
-      setFirstName(editProfileModal.firstName);
-      setLastName(editProfileModal.lastName);
-      persistAuthProfile({
+      setAuthProfile({
         firstName: editProfileModal.firstName,
         lastName: editProfileModal.lastName,
       });
@@ -265,8 +268,8 @@ function AdminWindow() {
     }
   };
 
-  if (roleLoading) {
-    return null;
+  if (roleLoading || profileLoading) {
+    return <PageSkeleton variant="admin" />;
   }
 
   return (
@@ -281,9 +284,7 @@ function AdminWindow() {
             firstName={firstName}
             lastName={lastName}
             email={email}
-            setFirstName={setFirstName}
-            setLastName={setLastName}
-            loading={editProfileModal?.loading || false}
+            loading={profileLoading || editProfileModal?.loading || false}
             onUpdate={handleOpenEditProfile}
           />
           {/* Sección para cambiar contraseña - siempre visible */}
@@ -298,6 +299,7 @@ function AdminWindow() {
             onOpenModal={() => setPasswordModalOpen(true)}
             onCloseModal={handleClosePasswordModal}
           />
+          <NotificationsSection onShowAlert={handleShowAlert} />
           {/* Sección para registrar nuevo administrador - solo para admins */}
           {isAdmin && (
             <RegisterAdminSection
@@ -315,18 +317,11 @@ function AdminWindow() {
             setConfirmModal={setConfirmModal}
           />
         </div>
-        {/* Sección para gestión de usuarios - solo para admins */}
         {isAdmin && (
-          <div className="admin-window-section">
-            <h3 className="admin-window-section-title">Panel de Administración</h3>
-            <p className="admin-window-section-description">
-              Como administrador puedes gestionar usuarios del sistema.
-            </p>
-            <UsersManagementSection
-              onShowAlert={handleShowAlert}
-              refreshToken={usersRefreshToken}
-            />
-          </div>
+          <UsersManagementSection
+            onShowAlert={handleShowAlert}
+            refreshToken={usersRefreshToken}
+          />
         )}
         {/* Información para usuarios normales */}
         {!isAdmin && (
@@ -343,26 +338,6 @@ function AdminWindow() {
                     <p>{email}</p>
                     <span className="admin-window-user-role">{roleName || "Usuario"}</span>
                   </div>
-                </div>
-                <div className="admin-window-user-permissions">
-                  <h5>Información de acceso</h5>
-                  <div className="admin-window-permissions-list">
-                    <div className="admin-window-permission-item admin-window-granted">
-                      <span className="admin-window-permission-icon">🪪</span>
-                      <span>Rol asignado</span>
-                      <span className="admin-window-permission-status">
-                        {roleName || "Sin asignar"}
-                      </span>
-                    </div>
-                    <div className="admin-window-permission-item admin-window-granted">
-                      <span className="admin-window-permission-icon">🔐</span>
-                      <span>Autenticación</span>
-                      <span className="admin-window-permission-status">Activa</span>
-                    </div>
-                  </div>
-                  <p className="admin-window-permissions-note">
-                    Si tu rol no coincide con el acceso esperado, solicita la actualización a un administrador.
-                  </p>
                 </div>
               </div>
             </div>

@@ -3,9 +3,10 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { getDefaultAuthenticatedPath } from "../utils/roleNavigation";
-import type { PermissionType } from "../../services/auth/types/PermissionType.type";
 import { hasAccessToken } from "../../services/auth/session";
+import { useCurrentRole } from "../../services/auth/authRole";
 import { useTheme } from "../theme/useTheme";
+import { NotificationBell } from "./NotificationBell";
 import "./Navbar.css";
 
 const ROUTE_HISTORY_KEY = "app:route-history";
@@ -60,11 +61,12 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
+  const { permissionType } = useCurrentRole();
 
   const currentPath = normalizePath(location.pathname);
   const isAuthenticated = hasAccessToken();
   const fallbackPath = isAuthenticated
-    ? getDefaultAuthenticatedPath(localStorage.getItem("permissionType") as PermissionType | null)
+    ? getDefaultAuthenticatedPath(permissionType)
     : "/login";
 
   useEffect(() => {
@@ -135,15 +137,18 @@ export const Navbar = () => {
             />
           </a>
 
-          <button
-            type="button"
-            className="nav-theme-toggle"
-            onClick={toggleTheme}
-            aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
-            title={isDark ? "Modo claro" : "Modo oscuro"}
-          >
-            {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
-          </button>
+          <div className="nav-actions">
+            {isAuthenticated && <NotificationBell />}
+            <button
+              type="button"
+              className="nav-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
+              title={isDark ? "Modo claro" : "Modo oscuro"}
+            >
+              {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
+            </button>
+          </div>
         </div>
       </header>
     </div>

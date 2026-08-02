@@ -50,10 +50,6 @@
   background: var(--app-beam);
 }
 
-.spinner-balls-white .ball {
-  background: #fff;
-}
-
 .ball1 {
   top: 0;
   left: 24px;

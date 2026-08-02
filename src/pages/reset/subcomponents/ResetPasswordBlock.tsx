@@ -40,13 +40,13 @@ export function ResetPasswordBlock({
   onSubmit: () => void;
 }): JSX.Element {
   return (
-    <div className="reset-window">
+    <div className="auth-secondary-card">
       {/* Título y descripción */}
-      <h1 className="reset-title">Restablecer Contraseña</h1>
-      <p className="reset-description">
+      <h1 className="auth-secondary-title">Restablecer Contraseña</h1>
+      <p className="auth-secondary-description">
         Ingrese el código de recuperación y su nueva contraseña.
       </p>
-      <div className="reset-form">
+      <div className="auth-secondary-form">
         {/* Inputs del formulario */}
         <ResetPasswordInputs
           recoveryCode={recoveryCode}
@@ -59,7 +59,7 @@ export function ResetPasswordBlock({
         {/* Botón de envío con spinner si loading */}
         <AppButton
           variant="primary"
-          className={`reset-button ${loading ? "loading" : ""}`}
+          className={`auth-secondary-button ${loading ? "loading" : ""}`}
           isLoading={loading}
           onClick={onSubmit}
         >

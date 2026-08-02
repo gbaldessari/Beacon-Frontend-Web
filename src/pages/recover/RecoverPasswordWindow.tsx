@@ -8,7 +8,7 @@
  */
 
 import { useState } from "react";
-import "./recoverPasswordWindow.css";
+import "../auth/authSecondaryWindow.css";
 import { recoverPassword } from "../../services/auth/auth.service";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -75,21 +75,21 @@ function RecoverPasswordWindow() {
   };
 
   return (
-    <div className="recover-auth-page">
+    <div className="auth-shell-page">
       {/* Alertas de éxito y error */}
       <AppAlert type="success" message={success} show={showSuccess} />
       <AppAlert type="error" message={error} show={showError} />
       <Navbar />
 
-      <main className="recover-auth-main">
-        <section className="recover-auth-hero">
-          <div className="recover-auth-container">
+      <main className="auth-shell-main">
+        <section className="auth-shell-hero auth-secondary-hero">
+          <div className="auth-shell-container">
             <h1>Recuperar acceso</h1>
             <p>Te enviamos un código seguro para volver a tu faro sin perder el rumbo.</p>
           </div>
         </section>
 
-        <section className="recover-auth-section">
+        <section className="auth-secondary-section">
           <RecoverForm
             email={email}
             setEmail={setEmail}

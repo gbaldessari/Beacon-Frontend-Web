@@ -36,7 +36,7 @@ export function ResetPasswordInputs({
       {/* Campo de código de recuperación */}
       <AppInput
         type="text"
-        className="reset-input"
+        className="auth-secondary-input"
         placeholder="Código de Recuperación"
         value={recoveryCode}
         onChange={onRecoveryCodeChange}
@@ -46,7 +46,7 @@ export function ResetPasswordInputs({
       {/* Campo de nueva contraseña */}
       <AppInput
         type="password"
-        className="reset-input"
+        className="auth-secondary-input"
         placeholder="Nueva Contraseña"
         value={newPassword}
         onChange={onNewPasswordChange}
@@ -55,7 +55,7 @@ export function ResetPasswordInputs({
       {/* Campo de confirmación de contraseña */}
       <AppInput
         type="password"
-        className="reset-input"
+        className="auth-secondary-input"
         placeholder="Confirmar Contraseña"
         value={confirmPassword}
         onChange={onConfirmPasswordChange}

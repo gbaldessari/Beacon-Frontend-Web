@@ -29,6 +29,10 @@ export type Reminder = {
   seriesUntil: string | null;
   originalOccurrenceDate: string | null;
   isOverride: boolean;
+  calendarId: string;
+  calendarName: string;
+  calendarColor: string;
+  canEdit: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -70,6 +74,7 @@ export type CreateReminderPayload = {
   notifyEnabled: boolean;
   notifyValue?: number;
   notifyUnit?: ReminderNotifyUnit;
+  calendarId: string;
 };
 
 export type UpdateReminderPayload = CreateReminderPayload & {

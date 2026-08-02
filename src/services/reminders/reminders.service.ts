@@ -44,11 +44,18 @@ const parseErrorMessage = (error: unknown): string => {
   return "Error de comunicación con el servidor.";
 };
 
-export const listReminders = async (): Promise<ServiceResponse<Reminder[]>> => {
+export const listReminders = async (
+  calendarIds?: string[],
+): Promise<ServiceResponse<Reminder[]>> => {
   try {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await axiosInstance.get("/reminders", {
-      params: { timezone },
+      params: {
+        timezone,
+        ...(calendarIds?.length
+          ? { calendarIds: calendarIds.join(",") }
+          : {}),
+      },
     });
     return { success: true, data: response.data as Reminder[] };
   } catch (error) {
@@ -59,11 +66,19 @@ export const listReminders = async (): Promise<ServiceResponse<Reminder[]>> => {
 export const listReminderOccurrences = async (
   from: string,
   to: string,
+  calendarIds?: string[],
 ): Promise<ServiceResponse<ReminderOccurrence[]>> => {
   try {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await axiosInstance.get("/reminders/occurrences", {
-      params: { from, to, timezone },
+      params: {
+        from,
+        to,
+        timezone,
+        ...(calendarIds?.length
+          ? { calendarIds: calendarIds.join(",") }
+          : {}),
+      },
     });
     return { success: true, data: response.data as ReminderOccurrence[] };
   } catch (error) {

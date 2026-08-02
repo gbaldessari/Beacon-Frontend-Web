@@ -1,0 +1,19 @@
+.invite-accept-page {
+  min-height: 100vh;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.invite-accept-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.invite-accept-main p {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--app-text-muted);
+  line-height: 1.5;
+}

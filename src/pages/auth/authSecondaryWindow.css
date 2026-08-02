@@ -1,71 +1,29 @@
-.reset-auth-page {
-  min-height: 100vh;
-  min-height: 100svh;
-  min-height: 100dvh;
-  background: var(--app-bg-mid);
-  color: var(--app-text);
-  display: flex;
-  flex-direction: column;
-}
+@import "./authShell.css";
 
-.reset-auth-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+/* Card + form compartidos por Recover y Reset password */
 
-.reset-auth-container {
-  width: 100%;
-  max-width: var(--content-max, 1140px);
-  margin: 0 auto;
-  padding: 0 var(--page-pad, 24px);
-  padding-left: max(var(--page-pad, 24px), var(--app-safe-left));
-  padding-right: max(var(--page-pad, 24px), var(--app-safe-right));
-}
-
-.reset-auth-hero {
-  position: relative;
-  overflow: hidden;
-  background: var(--app-hero-bg);
-  color: var(--app-hero-text);
+.auth-secondary-hero {
   padding: 40px 0 32px;
 }
 
-.reset-auth-hero::after {
-  content: "";
-  position: absolute;
-  width: 240px;
-  height: 240px;
-  top: -80px;
-  right: -40px;
-  border-radius: 50%;
-  background: var(--app-hero-glow);
-  pointer-events: none;
-}
-
-.reset-auth-hero h1 {
-  margin: 0 0 8px;
+.auth-secondary-hero h1 {
   font-size: clamp(1.4rem, 3vw, 1.75rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: var(--app-hero-text);
 }
 
-.reset-auth-hero p {
+.auth-secondary-hero p {
   margin: 0;
   font-size: 0.95rem;
   color: var(--app-hero-muted);
 }
 
-.reset-auth-section {
+.auth-secondary-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 16px 56px;
 }
 
-.reset-window {
+.auth-secondary-card {
   width: 100%;
   max-width: 480px;
   background: var(--app-panel);
@@ -76,20 +34,20 @@
   text-align: center;
 }
 
-.reset-title {
+.auth-secondary-title {
   margin: 0 0 4px;
   font-size: var(--text-h3);
   font-weight: 700;
   color: var(--app-heading);
 }
 
-.reset-description {
+.auth-secondary-description {
   margin: 0;
   font-size: var(--text-caption);
   color: var(--app-text-muted);
 }
 
-.reset-form {
+.auth-secondary-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -97,7 +55,7 @@
   width: 100%;
 }
 
-.reset-form .reset-input.app-ui-field {
+.auth-secondary-form .auth-secondary-input.app-ui-field {
   width: 100%;
   padding: 10px 14px;
   font-size: 16px;
@@ -108,17 +66,17 @@
   box-shadow: none;
 }
 
-.reset-form .reset-input.app-ui-field::placeholder {
+.auth-secondary-form .auth-secondary-input.app-ui-field::placeholder {
   color: var(--app-text-soft);
 }
 
-.reset-form .reset-input.app-ui-field:focus {
+.auth-secondary-form .auth-secondary-input.app-ui-field:focus {
   border-color: var(--app-primary-light);
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.16);
   background: var(--app-panel);
 }
 
-.reset-button.app-ui-button {
+.auth-secondary-button.app-ui-button {
   width: 100%;
   margin-top: 4px;
   min-height: 44px;
@@ -127,46 +85,41 @@
   font-weight: 600;
 }
 
-.reset-button.app-ui-button.app-ui-button--primary {
+.auth-secondary-button.app-ui-button.app-ui-button--primary {
   color: var(--app-accent-text);
   border: 0;
   background: var(--app-primary);
   box-shadow: none;
 }
 
-.reset-button.app-ui-button.app-ui-button--primary:hover:not(:disabled) {
+.auth-secondary-button.app-ui-button.app-ui-button--primary:hover:not(:disabled) {
   background: var(--app-primary-hover);
   opacity: 1;
   box-shadow: none;
 }
 
-.reset-button.app-ui-button.loading {
+.auth-secondary-button.app-ui-button.loading {
   animation: none;
 }
 
 @media (max-width: 960px) {
-  .reset-auth-container {
-    padding-left: max(var(--page-pad-sm, 16px), var(--app-safe-left));
-    padding-right: max(var(--page-pad-sm, 16px), var(--app-safe-right));
-  }
-
-  .reset-auth-hero {
+  .auth-secondary-hero {
     padding: 28px 0 24px;
   }
 
-  .reset-auth-section {
+  .auth-secondary-section {
     padding: 28px 16px 44px;
     padding-bottom: max(44px, calc(var(--app-safe-bottom) + 20px));
   }
 }
 
 @media (max-width: 640px) {
-  .reset-auth-section {
+  .auth-secondary-section {
     padding: 24px 16px 40px;
     padding-bottom: max(40px, calc(var(--app-safe-bottom) + 16px));
   }
 
-  .reset-window {
+  .auth-secondary-card {
     padding: 24px 20px 26px;
   }
 }

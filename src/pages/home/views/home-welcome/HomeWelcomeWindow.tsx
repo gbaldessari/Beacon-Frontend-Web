@@ -2,11 +2,15 @@
  * Componente de bienvenida para la vista principal.
  */
 import { useEffect, useState } from "react";
+import { useRemindersRealtimeRefresh } from "../../../../services/realtime/useRealtime";
 import { useNavigate } from "react-router-dom";
 import {
   MdCheckCircleOutline,
   MdChecklist,
+  MdChevronRight,
+  MdNotes,
   MdNotificationsActive,
+  MdPayments,
   MdPerson,
   MdRadioButtonUnchecked,
   MdSettings,
@@ -19,7 +23,7 @@ import {
   setReminderCompletion,
 } from "../../../../services/reminders/reminders.service";
 import type { UpcomingReminder } from "../../../../services/reminders/types/Reminder.type";
-import { AppAlert, AppButton } from "../../../../commons/components";
+import { AppAlert, AppButton, ListSkeleton, PageSkeleton } from "../../../../commons/components";
 
 function formatUpcomingWhen(reminder: UpcomingReminder): string {
   if (reminder.isDueToday) {
@@ -84,9 +88,17 @@ function HomeWelcomeWindow() {
     navigate(HomeRouteConfig.TASKS.navigatePath);
   };
 
+  const handleNavigateToFinance = () => {
+    navigate(HomeRouteConfig.FINANCE.navigatePath);
+  };
+
+  const handleNavigateToNotes = () => {
+    navigate(HomeRouteConfig.NOTES.navigatePath);
+  };
+
   const roleDescription = isAdmin
-    ? "Gestiona usuarios y perfiles para que Beacon siga claro y bajo control."
-    : "Revisa tu cuenta y mantén tus datos al día para navegar con confianza.";
+    ? "Tu perfil y la gente del sistema."
+    : "Tu nombre, correo y contraseña.";
 
   const canAccessProfile = hasRouteAccess(
     permissionType,
@@ -98,6 +110,20 @@ function HomeWelcomeWindow() {
     loading,
     HomeRouteConfig.TASKS.allowedPermissionTypes,
   );
+  const canAccessFinance = hasRouteAccess(
+    permissionType,
+    loading,
+    HomeRouteConfig.FINANCE.allowedPermissionTypes,
+  );
+  const canAccessNotes = hasRouteAccess(
+    permissionType,
+    loading,
+    HomeRouteConfig.NOTES.allowedPermissionTypes,
+  );
+
+  const overdueCount = upcoming.filter((item) => item.isOverdue).length;
+  const todayCount = upcoming.filter((item) => item.isDueToday && !item.isOverdue).length;
+  const previewLimit = 5;
 
   const loadUpcoming = async () => {
     setUpcomingLoading(true);
@@ -107,6 +133,10 @@ function HomeWelcomeWindow() {
     }
     setUpcomingLoading(false);
   };
+
+  useRemindersRealtimeRefresh(() => {
+    void loadUpcoming();
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -144,20 +174,117 @@ function HomeWelcomeWindow() {
     void loadUpcoming();
   };
 
+  if (loading) {
+    return <PageSkeleton variant="welcome" />;
+  }
+
   return (
     <div className="home-welcome-container">
       <AppAlert type="error" message={error} show={showError} />
       <div className="welcome-content">
-        <h2 className="welcome-title">¿Qué quieres hacer ahora?</h2>
-        <p className="welcome-subtitle">
-          Empieza por tu rutina o tu cuenta. Más herramientas de finanzas llegarán pronto.
-        </p>
+        <header className="welcome-header">
+          <h2 className="welcome-title">¿Qué quieres hacer?</h2>
+        </header>
+
+        <section className="welcome-menu" aria-label="Menú principal">
+
+          <div className="applications-grid">
+            {canAccessTasks && (
+              <button
+                type="button"
+                className="application-card tasks-application"
+                onClick={handleNavigateToTasks}
+              >
+                <div className="application-icon" aria-hidden="true">
+                  <MdChecklist size={28} />
+                </div>
+                <div className="application-copy">
+                  <h3>Tareas</h3>
+                  <p>Lo pendiente y lo que se repite.</p>
+                  {!upcomingLoading && upcoming.length > 0 && (
+                    <span className="application-meta">
+                      {upcoming.length} pendiente{upcoming.length === 1 ? "" : "s"}
+                    </span>
+                  )}
+                </div>
+                <MdChevronRight className="application-chevron" size={22} aria-hidden="true" />
+              </button>
+            )}
+
+            {canAccessFinance && (
+              <button
+                type="button"
+                className="application-card finance-application"
+                onClick={handleNavigateToFinance}
+              >
+                <div className="application-icon" aria-hidden="true">
+                  <MdPayments size={28} />
+                </div>
+                <div className="application-copy">
+                  <h3>Finanzas</h3>
+                  <p>Gastos, ingresos y metas.</p>
+                </div>
+                <MdChevronRight className="application-chevron" size={22} aria-hidden="true" />
+              </button>
+            )}
+
+            {canAccessNotes && (
+              <button
+                type="button"
+                className="application-card notes-application"
+                onClick={handleNavigateToNotes}
+              >
+                <div className="application-icon" aria-hidden="true">
+                  <MdNotes size={28} />
+                </div>
+                <div className="application-copy">
+                  <h3>Notas</h3>
+                  <p>Ideas, listas y etiquetas.</p>
+                </div>
+                <MdChevronRight className="application-chevron" size={22} aria-hidden="true" />
+              </button>
+            )}
+
+            {canAccessProfile && (
+              <button
+                type="button"
+                className="application-card profile-application"
+                onClick={handleNavigateToProfile}
+              >
+                <div className="application-icon" aria-hidden="true">
+                  {isAdmin ? <MdSettings size={28} /> : <MdPerson size={28} />}
+                </div>
+                <div className="application-copy">
+                  <h3>{isAdmin ? "Administración" : "Mi cuenta"}</h3>
+                  <p>{roleDescription}</p>
+                </div>
+                <MdChevronRight className="application-chevron" size={22} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </section>
 
         <section className="welcome-upcoming" aria-label="Tareas de hoy y avisos">
           <div className="welcome-upcoming-header">
             <div>
-              <h3>Hoy y avisos</h3>
-              <p>Pendientes de hoy y recordatorios con aviso activo.</p>
+              <div className="welcome-section-label welcome-section-label--inline">
+                <span>Hoy</span>
+                {!upcomingLoading && upcoming.length > 0 && (
+                  <span className="welcome-count-badge" aria-label={`${upcoming.length} pendientes`}>
+                    {upcoming.length}
+                  </span>
+                )}
+              </div>
+              <h3>Pendientes y avisos</h3>
+              <p>
+                {upcomingLoading
+                  ? "Preparando pendientes…"
+                  : overdueCount > 0
+                    ? `${overdueCount} vencido${overdueCount === 1 ? "" : "s"}${todayCount > 0 ? ` · ${todayCount} para hoy` : ""}`
+                    : todayCount > 0
+                      ? `${todayCount} para hoy`
+                      : "Sin urgencias por ahora"}
+              </p>
             </div>
             {canAccessTasks && (
               <AppButton variant="ghost" onClick={handleNavigateToTasks}>
@@ -167,7 +294,7 @@ function HomeWelcomeWindow() {
           </div>
 
           {upcomingLoading ? (
-            <p className="welcome-upcoming-empty">Cargando tareas…</p>
+            <ListSkeleton count={3} />
           ) : upcoming.length === 0 ? (
             <div className="welcome-upcoming-empty-card">
               <MdNotificationsActive size={22} aria-hidden="true" />
@@ -175,7 +302,7 @@ function HomeWelcomeWindow() {
             </div>
           ) : (
             <ul className="welcome-upcoming-list">
-              {upcoming.map((reminder) => {
+              {upcoming.slice(0, previewLimit).map((reminder) => {
                 const label = statusLabel(reminder);
                 return (
                   <li
@@ -207,43 +334,26 @@ function HomeWelcomeWindow() {
               })}
             </ul>
           )}
-        </section>
 
-        <div className="applications-grid">
-          {canAccessTasks && (
+          {!upcomingLoading && upcoming.length > previewLimit && canAccessTasks && (
             <button
               type="button"
-              className="application-card tasks-application"
+              className="welcome-upcoming-more"
               onClick={handleNavigateToTasks}
             >
-              <div className="application-icon" aria-hidden="true">
-                <MdChecklist size={36} />
-              </div>
-              <h3>Tareas y recordatorios</h3>
-              <p>Crea rutinas, define horarios y recibe avisos previos.</p>
+              Ver {upcoming.length - previewLimit} más
+              <MdChevronRight size={18} aria-hidden="true" />
             </button>
           )}
+        </section>
 
-          {canAccessProfile && (
-            <button
-              type="button"
-              className="application-card profile-application"
-              onClick={handleNavigateToProfile}
-            >
-              <div className="application-icon" aria-hidden="true">
-                {isAdmin ? <MdSettings size={36} /> : <MdPerson size={36} />}
-              </div>
-              <h3>{isAdmin ? "Administración" : "Mi cuenta"}</h3>
-              <p>{roleDescription}</p>
-            </button>
-          )}
-        </div>
-
-        <div className="user-permissions-info">
-          <p>
-            <strong>Rol activo:</strong> {roleName || "Sin asignar"}
-          </p>
-        </div>
+        {isAdmin &&
+          <div className="user-permissions-info">
+            <p>
+              Rol activo · <strong>{roleName || "Sin asignar"}</strong>
+            </p>
+          </div>
+        }
       </div>
     </div>
   );

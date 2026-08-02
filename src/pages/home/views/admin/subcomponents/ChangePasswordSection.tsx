@@ -13,8 +13,7 @@
  * @param props.onChangePassword - Función para cambiar la contraseña.
  * @returns El formulario para cambiar la contraseña.
  */
-import type { MouseEvent } from "react";
-import { AppButton, AppInput, DotSpinner } from '../../../../../commons/components';
+import { AppButton, AppInput, AppModal, DotSpinner } from '../../../../../commons/components';
 
 export function ChangePasswordSection({
   currentPassword,
@@ -37,18 +36,12 @@ export function ChangePasswordSection({
   onOpenModal: () => void;
   onCloseModal: () => void;
 }) {
-  const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !loading) {
-      onCloseModal();
-    }
-  };
-
   return (
     <>
       <div className="admin-window-minimal-section">
         <h2>Cambiar Contraseña</h2>
         <p className="admin-window-action-description">
-          Actualiza tu contraseña periódicamente para mantener tu cuenta segura.
+          Si quieres cambiarla, ábrelo acá.
         </p>
         <AppButton
           variant="primary"
@@ -60,57 +53,61 @@ export function ChangePasswordSection({
         </AppButton>
       </div>
 
-      {isOpen && (
-        <div className="admin-window-modal-overlay" onClick={handleOverlayClick}>
-          <div className="modal admin-window-modal">
-            <h3>Actualizar contraseña</h3>
-            <div className="admin-window-modal-form">
-              <div className="admin-window-modal-field">
-                <label>Contraseña actual</label>
-                <AppInput
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="admin-window-minimal-input"
-                  autoComplete="off"
-                  disabled={loading}
-                />
-              </div>
-              <div className="admin-window-modal-field">
-                <label>Nueva contraseña</label>
-                <AppInput
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="admin-window-minimal-input"
-                  autoComplete="off"
-                  disabled={loading}
-                />
-                <span className="admin-window-modal-note">
-                  Debe tener 8-16 caracteres e incluir letras y números.
-                </span>
-              </div>
-            </div>
-            <div className="admin-window-modal-actions">
-              <AppButton variant="secondary" className="admin-window-cancel-btn" onClick={onCloseModal} disabled={loading}>
-                Cancelar
-              </AppButton>
-              <AppButton
-                variant="primary"
-                className={`admin-window-submit-button ${loading ? "admin-window-loading" : ""}`}
-                onClick={onChangePassword}
-                isLoading={loading}
-              >
-                {loading ? (
-                  <DotSpinner compact />
-                ) : (
-                  "Cambiar contraseña"
-                )}
-              </AppButton>
-            </div>
+      <AppModal
+        open={isOpen}
+        title="Actualizar contraseña"
+        onClose={() => {
+          if (!loading) {
+            onCloseModal();
+          }
+        }}
+        className="admin-window-modal"
+      >
+        <div className="admin-window-modal-form">
+          <div className="admin-window-modal-field">
+            <label>Contraseña actual</label>
+            <AppInput
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="admin-window-minimal-input"
+              autoComplete="off"
+              disabled={loading}
+            />
+          </div>
+          <div className="admin-window-modal-field">
+            <label>Nueva contraseña</label>
+            <AppInput
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="admin-window-minimal-input"
+              autoComplete="off"
+              disabled={loading}
+            />
+            <span className="admin-window-modal-note">
+              Debe tener 8-16 caracteres e incluir letras y números.
+            </span>
           </div>
         </div>
-      )}
+        <div className="admin-window-modal-actions">
+          <AppButton variant="secondary" className="admin-window-cancel-btn" onClick={onCloseModal} disabled={loading}>
+            Cancelar
+          </AppButton>
+          <AppButton
+            variant="primary"
+            className="admin-window-submit-button"
+            onClick={onChangePassword}
+            isLoading={loading}
+          >
+            {loading ? (
+              <DotSpinner compact />
+            ) : (
+              "Cambiar contraseña"
+            )}
+          </AppButton>
+        </div>
+      </AppModal>
     </>
   );
 }
